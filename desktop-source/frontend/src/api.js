@@ -133,3 +133,6 @@ export const CreateAutoRule = async (rule) => callApp('CreateAutoRule', rule)
 export const UpdateAutoRule = async (rule) => callApp('UpdateAutoRule', rule)
 export const DeleteAutoRule = async (id) => callApp('DeleteAutoRule', id)
 export const RunAutoRulesNow = async () => callApp('RunAutoRulesNow')
+
+export const ImportCustomPromptsFromText = async () => callApp('ImportCustomPromptsFromText')
+export const ClearExternalImports = async () => callApp('ClearExternalImports')

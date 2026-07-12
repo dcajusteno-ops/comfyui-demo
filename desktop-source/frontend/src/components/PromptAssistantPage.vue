@@ -722,8 +722,46 @@ const saveCustomPrompt = async () => {
     resetCustomPromptForm()
     await persistAssistantState()
     toast.success('自定义提示词已保存')
-  } catch (error) {
+} catch (error) {
     toast.error(String(error?.message || error || '保存自定义提示词失败'))
+  } finally {
+    customPromptSaving.value = false
+  }
+}
+
+const clearExternalImports = async () => {
+  if (customPromptSaving.value) return
+  customPromptSaving.value = true
+  try {
+    await App.ClearExternalImports()
+    toast.success('已清空所有外部导入数据')
+    const custom = await App.GetCustomPromptEntries()
+    customEntries.value = Array.isArray(custom) ? custom : []
+    if (activeSource.value === '外部导入') {
+      activeSource.value = '系统词库'
+    }
+    currentPage.value = 1
+  } catch (error) {
+    toast.error(String(error?.message || error || '清空失败'))
+  } finally {
+    customPromptSaving.value = false
+  }
+}
+
+const importCustomPrompts = async () => {
+  if (customPromptSaving.value) return
+  customPromptSaving.value = true
+  try {
+    const addedCount = await App.ImportCustomPromptsFromText()
+    if (addedCount > 0) {
+      toast.success(`成功导入 ${addedCount} 条提示词`)
+      const custom = await App.GetCustomPromptEntries()
+      customEntries.value = Array.isArray(custom) ? custom : []
+      activeSource.value = '外部导入'
+      currentPage.value = 1
+    }
+  } catch (error) {
+    toast.error(String(error?.message || error || '导入失败'))
   } finally {
     customPromptSaving.value = false
   }
@@ -1031,12 +1069,20 @@ onMounted(async () => {
                   <Input v-model="customPromptForm.subcategory" placeholder="子分类，例如：动作" class="min-w-0 rounded-xl" />
                   <Input v-model="customPromptForm.scope" placeholder="作用域，例如：default" class="min-w-0 rounded-xl" />
                 </div>
-                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div class="flex flex-col gap-3 pt-2">
                   <div class="text-xs text-muted-foreground">来源会自动标记为“我的词库”。</div>
-                  <Button class="w-full rounded-xl md:w-auto md:shrink-0" @click="saveCustomPrompt" :disabled="customPromptSaving">
-                    <Plus class="mr-1.5 h-4 w-4" />
-                    保存自定义提示词
-                  </Button>
+                  <div class="flex gap-2 w-full flex-wrap justify-end">
+                    <Button variant="outline" class="w-full rounded-xl sm:w-auto sm:shrink-0 text-destructive border-destructive/30 hover:bg-destructive/10" @click="clearExternalImports" :disabled="customPromptSaving">
+                      清空导入
+                    </Button>
+                    <Button variant="outline" class="w-full rounded-xl sm:w-auto sm:shrink-0" @click="importCustomPrompts" :disabled="customPromptSaving">
+                      批量导入
+                    </Button>
+                    <Button class="w-full rounded-xl sm:w-auto sm:shrink-0" @click="saveCustomPrompt" :disabled="customPromptSaving">
+                      <Plus class="mr-1.5 h-4 w-4" />
+                      保存自定义提示词
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

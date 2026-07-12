@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 func normalizePromptAssistantState(state PromptAssistantState) PromptAssistantState {
@@ -424,4 +426,162 @@ func (a *App) DeletePromptTemplate(id string) error {
 		}
 	}
 	return a.savePromptTemplates(newTemplates)
+}
+
+// ImportCustomPromptsFromText opens a file dialog, reads a CSV/TXT prompt file, and imports entries into custom prompts.
+func (a *App) ImportCustomPromptsFromText() (int, error) {
+	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "选择提示词库文件",
+		Filters: []runtime.FileFilter{
+			{DisplayName: "Supported Files", Pattern: "*.txt;*.csv;*.json"},
+			{DisplayName: "All Files", Pattern: "*.*"},
+		},
+	})
+	if err != nil {
+		return 0, err
+	}
+	if filePath == "" {
+		return 0, nil // User cancelled
+	}
+
+	f, err := os.Open(filePath)
+	if err != nil {
+		return 0, fmt.Errorf("failed to open file: %w", err)
+	}
+	defer f.Close()
+
+	var newEntries []PromptLibraryEntry
+	importedSource := "外部导入"
+
+	if strings.HasSuffix(strings.ToLower(filePath), ".json") {
+		var jsonEntries []PromptLibraryEntry
+		if err := json.NewDecoder(f).Decode(&jsonEntries); err != nil {
+			return 0, fmt.Errorf("failed to parse json: %w", err)
+		}
+		for _, entry := range jsonEntries {
+			entry.Source = importedSource
+			if entry.Category == "" {
+				entry.Category = "default"
+			}
+			if entry.Subcategory == "" {
+				entry.Subcategory = "default"
+			}
+			if entry.Scope == "" {
+				entry.Scope = "normal"
+			}
+			newEntries = append(newEntries, entry)
+		}
+	} else {
+		reader := csv.NewReader(f)
+		reader.FieldsPerRecord = -1 // Allow variable number of fields
+		records, err := reader.ReadAll()
+		if err != nil {
+			return 0, fmt.Errorf("failed to read csv data: %w", err)
+		}
+		for _, row := range records {
+			if len(row) < 4 {
+				continue
+			}
+			en := strings.TrimSpace(row[0])
+			lastCol := strings.TrimSpace(row[3])
+			parts := strings.Split(lastCol, ",")
+			zh := ""
+			if len(parts) > 0 {
+				zh = strings.TrimSpace(parts[len(parts)-1])
+			}
+			newEntries = append(newEntries, PromptLibraryEntry{
+				Source:      importedSource,
+				Category:    "default",
+				Subcategory: "default",
+				Scope:       "normal",
+				TextEN:      en,
+				TextZH:      zh,
+			})
+		}
+	}
+
+	systemEntries, err := a.loadPromptLibrary()
+	if err != nil {
+		systemEntries = []PromptLibraryEntry{}
+	}
+	sysSet := make(map[string]bool)
+	for _, item := range systemEntries {
+		if en := normalizePromptTextKey(item.TextEN); en != "" {
+			sysSet[en] = true
+		}
+		if zh := normalizePromptTextKey(item.TextZH); zh != "" {
+			sysSet[zh] = true
+		}
+	}
+
+	customEntries, err := a.loadCustomPromptEntries()
+	if err != nil {
+		customEntries = []PromptLibraryEntry{}
+	}
+	custSet := make(map[string]bool)
+	for _, item := range customEntries {
+		if en := normalizePromptTextKey(item.TextEN); en != "" {
+			custSet[en] = true
+		}
+		if zh := normalizePromptTextKey(item.TextZH); zh != "" {
+			custSet[zh] = true
+		}
+	}
+
+	addedCount := 0
+	var finalEntries []PromptLibraryEntry
+
+	for _, entry := range newEntries {
+		if entry.TextEN == "" && entry.TextZH == "" {
+			continue
+		}
+
+		normEN := normalizePromptTextKey(entry.TextEN)
+		normZH := normalizePromptTextKey(entry.TextZH)
+
+		if (normEN != "" && sysSet[normEN]) || (normZH != "" && sysSet[normZH]) {
+			continue
+		}
+		if (normEN != "" && custSet[normEN]) || (normZH != "" && custSet[normZH]) {
+			continue
+		}
+
+		if normEN != "" {
+			custSet[normEN] = true
+		}
+		if normZH != "" {
+			custSet[normZH] = true
+		}
+
+		entry.ID = uuid.New().String()
+		entry = normalizePromptLibraryEntry(entry)
+		finalEntries = append(finalEntries, entry)
+		addedCount++
+	}
+
+	if addedCount > 0 {
+		customEntries = append(finalEntries, customEntries...)
+		if err := a.saveCustomPromptEntries(customEntries); err != nil {
+			return 0, fmt.Errorf("failed to save custom prompts: %w", err)
+		}
+	}
+
+	return addedCount, nil
+}
+
+// ClearExternalImports removes all prompt entries with source '外部导入' from custom prompts.
+func (a *App) ClearExternalImports() error {
+	customEntries, err := a.loadCustomPromptEntries()
+	if err != nil {
+		return err
+	}
+
+	var filtered []PromptLibraryEntry
+	for _, entry := range customEntries {
+		if entry.Source != "外部导入" {
+			filtered = append(filtered, entry)
+		}
+	}
+
+	return a.saveCustomPromptEntries(filtered)
 }

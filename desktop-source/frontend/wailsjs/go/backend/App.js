@@ -74,6 +74,10 @@ export function CleanupTags() {
   return window['go']['backend']['App']['CleanupTags']();
 }
 
+export function ClearExternalImports() {
+  return window['go']['backend']['App']['ClearExternalImports']();
+}
+
 export function ClearPreviewCache() {
   return window['go']['backend']['App']['ClearPreviewCache']();
 }
@@ -276,6 +280,10 @@ export function GetWindowBehaviorSettings() {
 
 export function GetWorkbenchAggregate(arg1) {
   return window['go']['backend']['App']['GetWorkbenchAggregate'](arg1);
+}
+
+export function ImportCustomPromptsFromText() {
+  return window['go']['backend']['App']['ImportCustomPromptsFromText']();
 }
 
 export function MoveCustomRoot(arg1, arg2) {

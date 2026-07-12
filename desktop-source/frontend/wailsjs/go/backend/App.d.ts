@@ -39,6 +39,8 @@ export function CleanupFavoriteReferences():Promise<number>;
 
 export function CleanupTags():Promise<number>;
 
+export function ClearExternalImports():Promise<void>;
+
 export function ClearPreviewCache():Promise<backend.CacheClearResult>;
 
 export function ClearUserProfileImage():Promise<backend.UserProfile>;
@@ -140,6 +142,8 @@ export function GetUtilityMenuSettings():Promise<backend.UtilityMenuState>;
 export function GetWindowBehaviorSettings():Promise<backend.WindowBehaviorSettings>;
 
 export function GetWorkbenchAggregate(arg1:backend.WorkbenchSummaryQuery):Promise<backend.WorkbenchAggregateResult>;
+
+export function ImportCustomPromptsFromText():Promise<number>;
 
 export function MoveCustomRoot(arg1:string,arg2:string):Promise<void>;
 
