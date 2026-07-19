@@ -1,0 +1,178 @@
+<script src="./misaka-TagSelect_files/hm.js"></script>
+
+<script src="./misaka-TagSelect_files/jquery-3.7.1.min.js"></script>
+
+<script src="./misaka-TagSelect_files/layui.js" charset="utf-8"></script>
+
+<script src="./misaka-TagSelect_files/drag-arrange.js"></script>
+
+<script src="./misaka-TagSelect_files/loadTags.js"></script>
+
+<script type="text/javascript">  window.rootPath = "/static/"; </script>
+
+<script src="./misaka-TagSelect_files/lay-config.js" charset="utf-8"></script>
+
+<script>
+        // 加载特定的类别标签
+        loadTags('Environment');
+        loadTags('Quality');
+        loadTags('Scene');
+        loadTags('Composition');
+        loadTags('Art_Style');
+        loadTags('Background');
+        loadTags('Expression');
+        loadTags('Face');
+        loadTags('Body');
+        loadTags('Clothing');
+        loadTags('Accessories');
+        loadTags('Character_Design');
+        loadTags('Action');
+        loadTags('Illustrator');
+        loadTags('characters');
+        loadTags('r18');
+    </script>
+
+<script>
+        function closeAd(event) {
+            event.stopPropagation(); // 阻止点击事件冒泡，避免触发广告的点击跳转
+            var adContainer = document.querySelector('.ad-container');
+            adContainer.style.display = 'none'; // 隐藏广告容器
+        }
+        function openInNewTab(url) {
+            window.open(url, '_blank'); // 在新标签页中打开链接
+        }
+        function loadtag() {
+            var input = document.getElementById('tagarea3').value;
+            var tags = input.split(/,|，/);
+
+            var insertionPoint = document.getElementById('user-Tag');
+            //clearall();
+            var usedStrings = new Set(); // 用于存储已经生成的字符串，确保不会重复
+
+            var tagObjects = tags.filter(tag => tag.trim().length > 0).map(tag => {
+                var randomString;
+                do {
+                    randomString = generateRandomString(6);
+                } while (usedStrings.has(randomString)); // 确保随机字符串不重复
+                usedStrings.add(randomString); // 添加到集合中，用于后续检查
+
+                return {
+                    tag: tag.trim(),
+                    randomString: randomString
+                };
+            });
+
+            // 不翻译
+            const translatedTexts_01 = " "
+            var tagTexts = tagObjects.map(tagObj => tagObj.tag);
+            tagObjects.forEach((tagObj, index) => {
+                var div = document.createElement('div');
+                div.className = 'tagbutton';
+                div.id = 'butuserTag_' + tagObj.randomString;
+
+                div.innerHTML = '<div class="minus" style="display: none;">-</div>' +
+                    '<div class="plus" style="display: none;">+</div>' +
+                    '<div class="buttext">' +
+                    '<span class="english">' + tagObj.tag + '</span>' +
+                    '<span class="chinese">' + translatedTexts_01 + '</span>' +
+                    '</div>';
+
+                insertionPoint.appendChild(div);
+            })
+            return;
+
+            // 提取所有标签文本进行批量翻译
+            var tagTexts = tagObjects.map(tagObj => tagObj.tag);
+            translateTexts(tagTexts)
+                .then(translatedTexts => {
+                    tagObjects.forEach((tagObj, index) => {
+                        var div = document.createElement('div');
+                        div.className = 'tagbutton';
+                        div.id = 'butuserTag_' + tagObj.randomString;
+
+                        div.innerHTML = '<div class="minus" style="display: none;">-</div>' +
+                            '<div class="plus" style="display: none;">+</div>' +
+                            '<div class="buttext">' +
+                            '<span class="english">' + tagObj.tag + '</span>' +
+                            '<span class="chinese">' + translatedTexts[index] + '</span>' +
+                            '</div>';
+
+                        insertionPoint.appendChild(div);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function translateTexts(texts) {
+            var url = '/api/Tagtranslate';
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ texts: texts })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.translated_texts) {
+                        return data.translated_texts;
+                    } else {
+                        throw new Error('Translation failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // return texts; // 在错误情况下返回原始文本
+                    return " "; // 在错误情况下返回空
+                });
+        }
+
+        function clearall() {
+            var userTagDiv = document.getElementById('user-Tag');
+            var existingTags = userTagDiv.querySelectorAll('.tagbutton');
+            existingTags.forEach(function (tag) {
+                tag.remove();
+            });
+        }
+
+        function generateRandomString(length) {
+            var result = '';
+            var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var charactersLength = characters.length;
+            for (var i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
+            return result;
+        }
+    </script>
+
+<script>
+        layui.use(['layer'], function () {
+            var layer = layui.layer;
+
+            // 页面加载完毕时执行
+            window.onload = function () {
+                // 检查localStorage来判断是否首次加载
+                if (!localStorage.getItem('1001')) {
+                    // 显示Msg弹出层
+                    layer.msg('<h3>欢迎使用宝宝巴士都会用的tag选择器</h3><br>如果手机浏览器出现卡死，请换用edge浏览器', {
+                        time: 5000,
+                        btn: ['好的']
+                    }, function () {
+                        // 关闭弹出层后的回调函数
+                    });
+
+                    // 标记已经访问过页面
+                    localStorage.setItem('1001', 'true');
+                }
+            }
+        });
+    </script>
+

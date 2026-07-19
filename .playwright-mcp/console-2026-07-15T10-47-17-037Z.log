@@ -1,0 +1,4 @@
+[    7369ms] TypeError: Cannot read properties of null (reading 'style')
+    at https://tag-select.nai4.top/misaka-TagSelect_files/loadTags.js:7886:73
+[   66815ms] [LOG] true @ https://tag-select.nai4.top/misaka-TagSelect_files/loadTags.js:7786
+[  100116ms] [LOG] true @ https://tag-select.nai4.top/misaka-TagSelect_files/loadTags.js:7786

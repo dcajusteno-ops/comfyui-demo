@@ -500,19 +500,6 @@ func (a *App) ImportCustomPromptsFromText() (int, error) {
 		}
 	}
 
-	systemEntries, err := a.loadPromptLibrary()
-	if err != nil {
-		systemEntries = []PromptLibraryEntry{}
-	}
-	sysSet := make(map[string]bool)
-	for _, item := range systemEntries {
-		if en := normalizePromptTextKey(item.TextEN); en != "" {
-			sysSet[en] = true
-		}
-		if zh := normalizePromptTextKey(item.TextZH); zh != "" {
-			sysSet[zh] = true
-		}
-	}
 
 	customEntries, err := a.loadCustomPromptEntries()
 	if err != nil {
@@ -539,9 +526,7 @@ func (a *App) ImportCustomPromptsFromText() (int, error) {
 		normEN := normalizePromptTextKey(entry.TextEN)
 		normZH := normalizePromptTextKey(entry.TextZH)
 
-		if (normEN != "" && sysSet[normEN]) || (normZH != "" && sysSet[normZH]) {
-			continue
-		}
+
 		if (normEN != "" && custSet[normEN]) || (normZH != "" && custSet[normZH]) {
 			continue
 		}
