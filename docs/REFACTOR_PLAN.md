@@ -1,7 +1,7 @@
 # Comfy Manager 重构收敛计划
 
-当前基线版本：`v3.1`  
-整理日期：`2026-04-27`
+当前基线版本：`v3.2.0`  
+整理日期：`2026-10-09`
 
 ## 1. 这份计划的目的
 
@@ -37,6 +37,13 @@
 - `useGalleryData.js`
 - `useLibraryMeta.js`
 - `Lightbox` 相关组件拆分
+
+`v3.2.0` 又按同一思路继续拆了一层：
+
+- 查看器逻辑从 `Lightbox.vue` 抽出 `useImageZoom.js`、`useDominantColor.js`、`useParallaxFloat.js`、`useBatchGroups.js`
+- 查看器视觉层拆成 `AmbientBackdrop / GroundReflection / ImageFilmstrip / BatchOverview / ImageHud / StackFan` 等小组件，避免把 `LightboxViewer` 撑爆
+- 图库的 3D 环绕视图独立成 `OrbitGallery.vue`
+- 壁纸做成根级状态模块 `src/wallpaper.js`（与 `src/theme.js` 同级），组件只负责编辑界面
 
 ### 2.3 发布链收敛完成
 

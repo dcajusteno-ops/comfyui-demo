@@ -1,7 +1,7 @@
 # Comfy Manager 项目上下文
 
-当前版本：`v3.1`  
-更新时间：`2026-05-08`
+当前版本：`v3.2.0`  
+更新时间：`2026-10-09`
 
 ## 1. 项目定位
 
@@ -14,6 +14,8 @@ Comfy Manager 是一个基于 **Wails v2 + Go + Vue 3** 的桌面应用，面向
 - 管理目录、回收站、缓存和自定义目录
 - 提供提示词助手、模板与自动规则，提升复用效率
 - 提供右下角灵动图库小窗，支持置顶、分页、快速筛选和轻量批量操作
+- 提供更完整的大图查看体验（氛围画廊、缩略图导航条、批次概览层、参数 HUD、层叠连拍组）
+- 提供 3D 环绕预览模式与背景壁纸自定义
 
 这不是云相册，也不是远程协作系统。  
 它当前的产品重心仍然是：
@@ -97,7 +99,7 @@ comfy-manager/
 - `frontend/src/components/Home.vue`
   工作台总览
 - `frontend/src/components/ImageGallery.vue`
-  图库主视图
+  图库主视图，含「网格 / 环绕」视图切换
 - `frontend/src/components/DateWorkbench.vue`
   日期产出工作台
 - `frontend/src/components/StatisticsDashboard.vue`
@@ -106,10 +108,35 @@ comfy-manager/
   软件内使用文档
 - `frontend/src/components/CompactWindow.vue`
   灵动图库小窗，承载置顶窗口、目录选择、搜索、分页、批量选择和图片详情入口
+- `frontend/src/components/ProfileCenter.vue`
+  个人中心，含外观与偏好、背景壁纸入口
 - `frontend/src/components/PromptAssistantPage.vue`
   提示词助手
 - `frontend/src/components/AutoRulesPanel.vue`
   自动规则引擎
+
+### 大图查看器（灯箱）相关
+
+- `Lightbox.vue`
+  灯箱状态中心（缩放、切换、批次概览层开关、键盘）
+- `LightboxViewer.vue`
+  画布层（承载氛围背景、导航条、HUD、层叠卡牌）
+- `LightboxToolbar.vue` / `ImageMetadataPanel.vue`
+  右侧工具栏与元数据面板
+- `AmbientBackdrop.vue` / `GroundReflection.vue`
+  主色氛围光晕与地面倒影
+- `ImageFilmstrip.vue`
+  底部缩略图导航条
+- `BatchOverview.vue`
+  批次概览层（按同日 / 同模型 / 同提示词 / 连拍组分组）
+- `ImageHud.vue`
+  参数 HUD
+- `StackFan.vue`
+  连拍组 3D 层叠卡牌
+- `OrbitGallery.vue`
+  图库的 3D 环绕预览模式
+- `WallpaperPanel.vue`
+  背景壁纸编辑器
 
 ### 当前已拆分的 composables
 
@@ -123,6 +150,21 @@ comfy-manager/
   标签、收藏、笔记等资料元数据
 - `useWorkbenchFilters.js`
   工作台日期 / 模型 / LoRA 筛选
+- `useImageZoom.js`
+  图片缩放 / 平移（灯箱与灵动小窗共用）
+- `useDominantColor.js`
+  图片主色提取（氛围光晕用）
+- `useParallaxFloat.js`
+  鼠标视差浮动
+- `useBatchGroups.js`
+  批次分组派生（同日 / 同模型 / 同提示词 / 连拍组）
+
+### 根级状态模块
+
+- `frontend/src/theme.js`
+  亮 / 暗主题与 View Transition 切换
+- `frontend/src/wallpaper.js`
+  背景壁纸配置、CSS 变量注入与持久化
 
 ## 6. 数据持久化
 
@@ -133,11 +175,13 @@ comfy-manager/
 - `image-tags.json`
 - `image-notes.json`
 - `custom-roots.json`
-- `settings.json`
+- `settings.json`（用户资料、性能设置、**壁纸配置**）
 - `auto-rules.json`
 - `trash-metadata.json`
 - `image-meta-cache.json`
 - `prompt-library/`
+- `profile/`（头像图片）
+- `wallpaper/`（壁纸图片，settings 里只存 `__wallpaper__/` 相对路径）
 
 ## 7. 关键业务链路
 
@@ -161,27 +205,28 @@ comfy-manager/
 
 本地词库 -> 搜索 / 分类 / 模板 -> 拼装 Prompt -> 回写使用上下文
 
-## 8. v3.1 当前状态总结
+### 背景壁纸链
 
-`v3.1` 的主要成果：
+个人中心选图 -> 原生文件对话框 -> 复制进 `data/wallpaper/wallpaper.<ext>` -> settings 存 `__wallpaper__/` 相对路径 -> 前端注入 `html.has-wallpaper` 类与 CSS 变量 -> 表面令牌半透明化让壁纸透出
 
-- 后端源码收纳进 `desktop-source/backend/`
-- 前端与后端绑定兼容问题修复
-- 首页异常文案问题修复
-- 日期归档目录黑屏问题修复
-- 年份分类可折叠行为恢复
-- 灵动图库小窗接入主窗口，支持置顶、恢复、刷新和更适合窗口模式的紧凑布局
-- 小窗图片区支持分页，筛选和工具收进折叠面板，减少顶部控件占用
-- 小窗危险操作改为应用内确认弹层，避免 Wails 原生 `window.confirm` 样式
-- 软件内文档、GitHub README 与发布说明重写
-- Windows 安装包构建链恢复
-- 根目录 exe 和安装包重新打包同步
+## 8. v3.2.0 当前状态总结
+
+`v3.2.0` 的主要成果：
+
+- 大图查看器增强：氛围画廊（主色光晕 / 地面倒影 / 相纸显影 / 鼠标视差）、底部缩略图导航条、批次概览层、参数 HUD、3D 层叠连拍组
+- 灵动小窗图片详情补齐缩放与拖动，与主窗口体验对齐
+- 图库新增 3D 环绕预览模式：光柱贯穿、多层环绕、拖动惯性旋转、滚轮上下滚动、每圈张数可调并自适应窗口
+- 新增背景壁纸自定义：本地选图、填充方式、压暗、面板不透明度、面板毛玻璃，侧栏 / 卡片 / 浮层半透明透出壁纸
+- 缺陷修复：开发模式图片全裂、3D 环绕滚轮方向反了、环绕视图卡片被放大裁切、环绕视图背景不跟随壁纸
+- 版本号统一：`project.nsi` / `package.json` / README / docs / 软件内使用文档全部对齐 `v3.2.0`
+- 安装包与根目录 exe 重新打包，并校验「安装包内解出的 exe 哈希与根目录一致」
 
 ## 9. 当前边界与原则
 
 - 当前阶段不继续做更深的 Go 包拆分
 - 以后新增后端能力，优先继续放进 `backend/` 现有分组
 - 优先维持外部行为稳定，再做结构优化
+- 新增控制类交互时优先复用语义令牌（`bg-card` / `text-muted-foreground` 等），不要在组件里写死颜色——写死的深色底会把背景壁纸盖死（`OrbitGallery.vue` 就是反例，已用 `.wp-scrim` 修正）
 - 发布时必须同时同步：
   - 根目录 exe
   - 安装程序
@@ -199,4 +244,4 @@ comfy-manager/
 2. 继续收敛前端大组件的职责边界
 3. 检查小窗和主窗口图库筛选逻辑是否可以进一步复用
 4. 评估是否需要补一份图库 / 工作台 / 小窗数据流图
-
+5. 评估灯箱是否也要透出背景壁纸（当前灯箱是「模糊当前图 + 纯黑」的沉浸式设计，刻意未跟随壁纸）

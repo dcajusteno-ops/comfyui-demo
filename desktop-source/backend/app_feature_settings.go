@@ -25,6 +25,7 @@ func (a *App) loadSettings() (Settings, error) {
 	originalPerformanceSettings := settingsToGalleryPerformanceSettings(settings)
 	originalOutputConfigured := settings.OutputConfigured
 	originalTrashRetention := settings.TrashRetentionDays
+	originalWallpaper := settings.Wallpaper
 	if settings.TrashRetentionDays <= 0 {
 		settings.TrashRetentionDays = 30
 	}
@@ -34,12 +35,14 @@ func (a *App) loadSettings() (Settings, error) {
 	settings.ShortcutSettings = normalizeShortcutSettings(settings.ShortcutSettings)
 	settings.UserProfile = normalizeUserProfile(settings.UserProfile)
 	settings.UtilityMenu = normalizeUtilityMenuState(settings.UtilityMenu)
+	settings.Wallpaper = normalizeWallpaperConfig(settings.Wallpaper)
 	applyGalleryPerformanceSettings(&settings, settingsToGalleryPerformanceSettings(settings))
 	if settings.TrashRetentionDays != originalTrashRetention ||
 		settings.OutputConfigured != originalOutputConfigured ||
 		!reflect.DeepEqual(settings.ShortcutSettings, originalShortcutSettings) ||
 		!reflect.DeepEqual(settings.UserProfile, originalUserProfile) ||
 		!reflect.DeepEqual(settings.UtilityMenu, originalUtilityMenu) ||
+		!reflect.DeepEqual(settings.Wallpaper, originalWallpaper) ||
 		!reflect.DeepEqual(settingsToGalleryPerformanceSettings(settings), originalPerformanceSettings) {
 		_ = a.saveSettings(settings)
 	}

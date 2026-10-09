@@ -10,13 +10,16 @@ import {
   FolderTree,
   Heart,
   HelpCircle,
+  Images,
   Keyboard,
   LayoutDashboard,
+  Orbit,
   PencilRuler,
   Search,
   Settings2,
   Tag,
   Trash2,
+  Wallpaper,
   Wand2,
 } from 'lucide-vue-next'
 
@@ -40,6 +43,21 @@ const featureCards = [
     icon: Search,
     title: '搜索与精查',
     description: '支持按文件名、路径、Prompt、模型、LoRA、标签和笔记搜索，适合在大图库中快速定位目标。',
+  },
+  {
+    icon: Images,
+    title: '大图查看器',
+    description: '氛围光晕与地面倒影、底部缩略图导航条、批次概览层、参数 HUD、3D 层叠连拍组，看图细节一次补齐。',
+  },
+  {
+    icon: Orbit,
+    title: '3D 环绕预览',
+    description: '图库可切换「网格 / 环绕」视图：图片沿中央光柱多层环绕，拖动旋转、滚轮上下滚动，每圈张数可调。',
+  },
+  {
+    icon: Wallpaper,
+    title: '背景壁纸自定义',
+    description: '个人中心选一张本地图片当背景，可调压暗、面板不透明度和毛玻璃，侧栏与卡片会半透明地透出壁纸。',
   },
   {
     icon: Clock3,
@@ -129,13 +147,40 @@ const quickGuides = [
       '使用分页浏览更多图片，每页可在 60 / 120 / 240 张之间切换。',
     ],
   },
+  {
+    title: '在大图里快速过一批图',
+    steps: [
+      '点开任意一张图，想跳到附近的图就直接点底部缩略图导航条。',
+      '想整体看一眼这一批，按空格打开批次概览层，还可以切换“同日 / 同模型 / 同提示词 / 连拍组”。',
+      '点中目标图后概览层自动收起，回到大图继续看细节。',
+    ],
+  },
+  {
+    title: '用环绕模式逛一遍图库',
+    steps: [
+      '在图库工具栏把视图从“网格”切到“环绕”。',
+      '拖动旋转看整体分布，滚轮上下滚动看塔的上下层，空闲时会自动缓慢旋转。',
+      '左上角调整每圈张数：张数少塔就高，可以滚着逛；调大则更紧凑。',
+    ],
+  },
+  {
+    title: '换一张背景壁纸',
+    steps: [
+      '进入个人中心，在“外观与偏好”下面找到“背景壁纸”。',
+      '点“选择壁纸图片”，图片会复制到 data/wallpaper，原图之后删掉也不影响。',
+      '按需调压暗、面板不透明度；嫌面板太实就调低不透明度，想加模糊就打开毛玻璃。',
+    ],
+  },
 ]
 
 const shortcuts = [
   { key: 'Esc', action: '关闭大图、弹窗或退出当前选择状态' },
   { key: 'Delete', action: '删除当前选中图片，删除前通常会先弹确认' },
   { key: '方向键', action: '在大图预览中切换上一张 / 下一张' },
+  { key: '↑ / ↓', action: '在大图中切换同一连拍组里的上一张 / 下一张' },
+  { key: '空格', action: '在大图中开合批次概览层' },
   { key: 'Ctrl + 0', action: '在大图中重置缩放状态' },
+  { key: '滚轮 / 拖动', action: '在大图中缩放与平移（双击可快速放大 / 还原）' },
   { key: '批量模式 + 点击', action: '快速多选图片，用于批量操作' },
 ]
 
@@ -168,6 +213,14 @@ const faqs = [
     q: '切换了 output 之后要不要重装软件？',
     a: '不需要。重新绑定 output 即可，必要时再刷新图库或清理一次预览缓存。',
   },
+  {
+    q: '壁纸图片存在哪？删掉原图会怎样？',
+    a: '选完壁纸后，软件会把图片复制一份到 `data/wallpaper/`，配置里只记录这个副本。所以原图移动、重命名或删除都不影响壁纸显示；想彻底清掉，在壁纸卡片里点“移除壁纸”即可。',
+  },
+  {
+    q: '开了壁纸之后，为什么有些地方的背景没变？',
+    a: '绝大多数面板都会跟随壁纸变半透明。唯一刻意保留纯色的是全屏大图查看器（灯箱）——它是“当前图片模糊放大垫底 + 压一层黑”的沉浸式环境，这样看图时不会被壁纸干扰。',
+  },
 ]
 </script>
 
@@ -177,7 +230,7 @@ const faqs = [
       <BookOpen class="mr-3 h-5 w-5 text-primary" />
       <div class="flex items-center gap-3">
         <h1 class="text-xl font-bold tracking-tight">使用文档</h1>
-        <Badge variant="outline" class="rounded-full px-3 py-1 text-xs">v3.1</Badge>
+        <Badge variant="outline" class="rounded-full px-3 py-1 text-xs">v3.2.0</Badge>
       </div>
     </div>
 
@@ -189,11 +242,11 @@ const faqs = [
               <Clock3 class="h-4 w-4" />
               <span>当前版本说明</span>
             </div>
-            <h2 class="text-3xl font-semibold tracking-tight">v3.1 使用说明</h2>
+            <h2 class="text-3xl font-semibold tracking-tight">v3.2.0 使用说明</h2>
             <p class="max-w-3xl text-sm leading-7 text-muted-foreground">
               你现在看到的软件内文档已经与 GitHub README、发布说明、安装器版本和当前桌面程序同步到
-              <span class="font-medium text-foreground">v3.1</span>。这版在延续结构整理与文档同步的基础上，补齐了日期归档目录黑屏、
-              归档树折叠异常、灵动图库小窗、分页浏览、应用内确认弹层以及根目录发布产物覆盖校验。
+              <span class="font-medium text-foreground">v3.2.0</span>。这一版是一次围绕“看图体验”的更新：重做了大图查看器（氛围光晕与倒影、缩略图导航条、
+              批次概览层、参数 HUD、层叠连拍组），给图库加了 3D 环绕预览模式，并新增了背景壁纸自定义。
             </p>
           </div>
         </section>
@@ -302,7 +355,7 @@ const faqs = [
         </section>
 
         <div class="pt-4 text-center text-sm text-muted-foreground">
-          Comfy Manager v3.1 / 面向 ComfyUI 出图整理、灵动小窗、目录治理与提示词工作流
+          Comfy Manager v3.2.0 / 面向 ComfyUI 出图整理、大图查看、灵动小窗、目录治理与提示词工作流
         </div>
       </div>
     </div>

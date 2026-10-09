@@ -23,6 +23,7 @@ import {
   Pin,
   PinOff,
   RefreshCw,
+  RotateCcw,
   Search,
   SlidersHorizontal,
   Sparkles,
@@ -37,6 +38,7 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import * as App from '@/api'
+import { useImageZoom } from '@/composables/useImageZoom'
 
 const props = defineProps({
   latestImages: { type: Array, default: () => [] },
@@ -484,6 +486,29 @@ const openAdjacent = (offset) => {
   openDetail(visibleImages.value[nextIndex])
 }
 
+const {
+  scale: zoomScale,
+  offset: zoomOffset,
+  isDragging: zoomDragging,
+  handleWheel: zoomWheel,
+  handleMouseDown: zoomMouseDown,
+  handleMouseMove: zoomMouseMove,
+  handleMouseUp: zoomMouseUp,
+  resetZoom,
+} = useImageZoom()
+
+const handleDetailWheel = (event) => {
+  // 未缩放时把滚轮让给外层滚动，只在「向上滚（放大）」时接管
+  if (zoomScale.value === 1 && event.deltaY >= 0) return
+  event.preventDefault()
+  zoomWheel(event)
+}
+
+watch(
+  () => selectedImage.value?.relPath,
+  () => resetZoom(),
+)
+
 const copyText = async (value, label) => {
   if (!value) return
   await runAction(`copy-${label}`, async () => {
@@ -824,9 +849,43 @@ const folderRowStyle = (row) => ({
 
       <div class="min-h-0 flex-1 overflow-y-auto p-3">
         <div class="overflow-hidden rounded-md border bg-card">
-          <div class="grid aspect-[4/3] place-items-center bg-muted">
-            <img v-if="detailImageSrc" :src="detailImageSrc" :alt="selectedImage.name" class="h-full w-full object-contain" />
+          <div
+            class="relative grid aspect-[4/3] place-items-center overflow-hidden bg-muted"
+            :class="{ 'cursor-grab': zoomScale > 1 && !zoomDragging, 'cursor-grabbing': zoomDragging }"
+            @wheel="handleDetailWheel"
+            @mousedown="zoomMouseDown"
+            @mousemove="zoomMouseMove"
+            @mouseup="zoomMouseUp"
+            @mouseleave="zoomMouseUp"
+          >
+            <img
+              v-if="detailImageSrc"
+              :src="detailImageSrc"
+              :alt="selectedImage.name"
+              draggable="false"
+              class="pointer-events-none h-full w-full select-none object-contain"
+              :class="{ 'transition-transform duration-75 ease-out': !zoomDragging }"
+              :style="{ transform: `translate(${zoomOffset.x}px, ${zoomOffset.y}px) scale(${zoomScale})` }"
+            />
             <ImageIcon v-else class="h-8 w-8 text-muted-foreground" />
+
+            <div
+              v-if="zoomScale !== 1"
+              class="pointer-events-none absolute bottom-2 left-2 rounded-full border border-border/70 bg-background/85 px-2 py-0.5 font-mono text-[11px] text-muted-foreground backdrop-blur"
+            >
+              {{ Math.round(zoomScale * 100) }}%
+            </div>
+
+            <button
+              v-if="zoomScale !== 1 || zoomOffset.x !== 0 || zoomOffset.y !== 0"
+              type="button"
+              class="absolute right-2 top-2 flex items-center gap-1 rounded-md border border-border/70 bg-background/85 px-2 py-1 text-[11px] text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
+              title="重置视图"
+              @click.stop="resetZoom"
+            >
+              <RotateCcw class="h-3 w-3" />
+              重置
+            </button>
           </div>
         </div>
 

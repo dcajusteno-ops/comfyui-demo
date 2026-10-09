@@ -744,6 +744,30 @@ export namespace backend {
 	        this.icon = source["icon"];
 	    }
 	}
+	export class WallpaperConfig {
+	    enabled: boolean;
+	    imagePath?: string;
+	    fit?: string;
+	    dim?: number;
+	    surfaceAlpha?: number;
+	    blur?: boolean;
+	    version?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WallpaperConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enabled = source["enabled"];
+	        this.imagePath = source["imagePath"];
+	        this.fit = source["fit"];
+	        this.dim = source["dim"];
+	        this.surfaceAlpha = source["surfaceAlpha"];
+	        this.blur = source["blur"];
+	        this.version = source["version"];
+	    }
+	}
 	export class UtilityMenuItem {
 	    id: string;
 	    visible: boolean;
@@ -878,6 +902,7 @@ export namespace backend {
 	    galleryBackgroundVariantWarmup?: boolean;
 	    galleryMetadataLazy?: boolean;
 	    alwaysOnTop?: boolean;
+	    wallpaper?: WallpaperConfig;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -900,6 +925,7 @@ export namespace backend {
 	        this.galleryBackgroundVariantWarmup = source["galleryBackgroundVariantWarmup"];
 	        this.galleryMetadataLazy = source["galleryMetadataLazy"];
 	        this.alwaysOnTop = source["alwaysOnTop"];
+	        this.wallpaper = this.convertValues(source["wallpaper"], WallpaperConfig);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1010,6 +1036,7 @@ export namespace backend {
 	        this.errors = source["errors"];
 	    }
 	}
+	
 	
 	
 	

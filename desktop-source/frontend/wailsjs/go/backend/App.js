@@ -86,6 +86,10 @@ export function ClearUserProfileImage() {
   return window['go']['backend']['App']['ClearUserProfileImage']();
 }
 
+export function ClearWallpaperImage() {
+  return window['go']['backend']['App']['ClearWallpaperImage']();
+}
+
 export function CopyText(arg1) {
   return window['go']['backend']['App']['CopyText'](arg1);
 }
@@ -274,6 +278,10 @@ export function GetUtilityMenuSettings() {
   return window['go']['backend']['App']['GetUtilityMenuSettings']();
 }
 
+export function GetWallpaper() {
+  return window['go']['backend']['App']['GetWallpaper']();
+}
+
 export function GetWindowBehaviorSettings() {
   return window['go']['backend']['App']['GetWindowBehaviorSettings']();
 }
@@ -378,12 +386,20 @@ export function SaveUtilityMenuSettings(arg1) {
   return window['go']['backend']['App']['SaveUtilityMenuSettings'](arg1);
 }
 
+export function SaveWallpaper(arg1) {
+  return window['go']['backend']['App']['SaveWallpaper'](arg1);
+}
+
 export function SelectFolder() {
   return window['go']['backend']['App']['SelectFolder']();
 }
 
 export function SelectUserProfileImage() {
   return window['go']['backend']['App']['SelectUserProfileImage']();
+}
+
+export function SelectWallpaperImage() {
+  return window['go']['backend']['App']['SelectWallpaperImage']();
 }
 
 export function ServeImage(arg1, arg2) {

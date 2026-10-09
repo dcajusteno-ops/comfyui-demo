@@ -568,6 +568,12 @@ const handleLightboxNavigate = (direction) => {
   lightboxImage.value = lightboxImages.value[nextIndex]
 }
 
+const handleLightboxJump = (index) => {
+  if (index < 0 || index >= lightboxImages.value.length) return
+  lightboxIndex.value = index
+  lightboxImage.value = lightboxImages.value[index]
+}
+
 const handleTimelineDelete = async (image) => {
   await handleDelete(image)
   await loadStats()
@@ -972,6 +978,7 @@ const insightCards = computed(() => [
         :image-notes="imageNotes"
         @close="lightboxOpen = false"
         @navigate="handleLightboxNavigate"
+        @jump-to-index="handleLightboxJump"
         @toggle-favorite="toggleFavorite"
         @add-tag="addTagToImage"
         @remove-tag="removeTagFromImage"

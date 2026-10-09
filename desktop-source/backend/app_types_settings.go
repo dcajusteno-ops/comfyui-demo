@@ -16,6 +16,20 @@ type Settings struct {
 	GalleryBackgroundVariantWarmup bool             `json:"galleryBackgroundVariantWarmup,omitempty"`
 	GalleryMetadataLazy            bool             `json:"galleryMetadataLazy,omitempty"`
 	AlwaysOnTop                    bool             `json:"alwaysOnTop,omitempty"`
+	Wallpaper                      WallpaperConfig  `json:"wallpaper,omitempty"`
+}
+
+// WallpaperConfig 描述「背景壁纸」的完整配置。
+// 与个人头像一样，图片本体复制到应用数据目录，这里只保存 __wallpaper__/ 开头的相对路径。
+type WallpaperConfig struct {
+	Enabled      bool    `json:"enabled"`
+	ImagePath    string  `json:"imagePath,omitempty"`
+	Fit          string  `json:"fit,omitempty"`          // cover | contain | auto
+	Dim          float64 `json:"dim,omitempty"`          // 0~1，压暗强度
+	SurfaceAlpha float64 `json:"surfaceAlpha,omitempty"` // 0.3~1，面板不透明度
+	Blur         bool    `json:"blur,omitempty"`         // 面板毛玻璃
+	// Version 是派生字段（图片文件的修改时间），只回给前端做缓存刷新用，不落盘
+	Version int64 `json:"version,omitempty"`
 }
 
 type GalleryPerformanceSettings struct {

@@ -16,6 +16,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css' // Import sonner styles
 import { useImages } from './composables/useImages'
+import { loadWallpaper } from './wallpaper'
 import * as App from '@/api'
 import { EventsOn } from '../wailsjs/runtime/runtime'
 
@@ -542,6 +543,8 @@ const handleOpenCurrentOutput = async () => {
 let unsubscribeImagesChanged = null
 let unsubscribeShortcutTriggered = null
 onMounted(async () => {
+    // 壁纸：模块导入时已按本地缓存铺上，这里再以后端配置校正一次
+    loadWallpaper()
     await fetchCustomRoots()
     await loadPerformanceSettings()
     await loadWindowBehaviorSettings()

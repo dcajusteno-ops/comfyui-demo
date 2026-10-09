@@ -1,6 +1,8 @@
 ﻿<script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import * as App from '@/api'
+import AmbientBackdrop from './AmbientBackdrop.vue'
+import BatchOverview from './BatchOverview.vue'
 import FavoriteGroupsDialog from './FavoriteGroupsDialog.vue'
 import ImageMetadataPanel from './ImageMetadataPanel.vue'
 import LightboxToolbar from './LightboxToolbar.vue'
@@ -18,7 +20,7 @@ const props = defineProps({
   openTagsOnMount: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['close', 'navigate', 'toggle-favorite', 'add-tag', 'remove-tag', 'delete', 'open-location', 'favorite-groups-changed', 'open-prompt-assistant'])
+const emit = defineEmits(['close', 'navigate', 'toggle-favorite', 'add-tag', 'remove-tag', 'delete', 'open-location', 'favorite-groups-changed', 'open-prompt-assistant', 'jump-to-index'])
 
 const currentStackImage = ref(null)
 
@@ -36,6 +38,15 @@ const metadata = ref(null)
 const metadataLoading = ref(false)
 const metadataError = ref('')
 const favoriteGroupsDialogOpen = ref(false)
+const hudVisible = ref(localStorage.getItem('lightboxHudVisible') !== 'false')
+const batchOverlayOpen = ref(false)
+
+watch(
+  () => props.isOpen,
+  isOpen => {
+    if (!isOpen) batchOverlayOpen.value = false
+  },
+)
 const displayImageSrc = ref('')
 const fullImageLoading = ref(false)
 let metadataRequestId = 0
@@ -100,6 +111,20 @@ const resetZoom = () => {
   scale.value = 1
   offset.value = { x: 0, y: 0 }
   isDragging.value = false
+}
+
+const toggleHud = () => {
+  hudVisible.value = !hudVisible.value
+  try {
+    localStorage.setItem('lightboxHudVisible', String(hudVisible.value))
+  } catch {
+    // 存储不可用时忽略，不影响本次会话
+  }
+}
+
+const handleBatchJump = index => {
+  batchOverlayOpen.value = false
+  emit('jump-to-index', index)
 }
 
 const loadImageMetadata = async () => {
@@ -173,6 +198,13 @@ const getStackCurrentIndex = () => {
   return idx >= 0 ? idx + 1 : 1
 }
 
+const goToStackIndex = index => {
+  if (!props.image?.isStackPrimary || props.image.stackCount <= 1) return
+  const stackItems = [props.image, ...(props.image.stackChildren || [])]
+  if (index < 0 || index >= stackItems.length) return
+  currentStackImage.value = stackItems[index]
+}
+
 const handleWheel = event => {
   if (!props.isOpen) return
   const delta = -event.deltaY
@@ -205,6 +237,20 @@ const handleMouseUp = () => {
 
 const handleKey = event => {
   if (!props.isOpen) return
+
+  // 空格：开合批次概览层（原先未占用该键）
+  if (event.code === 'Space') {
+    event.preventDefault()
+    batchOverlayOpen.value = !batchOverlayOpen.value
+    return
+  }
+
+  // 概览层打开时 Esc 优先关闭它
+  if (event.key === 'Escape' && batchOverlayOpen.value) {
+    batchOverlayOpen.value = false
+    return
+  }
+
   if (event.key === 'Escape') emit('close')
   if (event.key === 'ArrowLeft') {
     goToPrev()
@@ -282,6 +328,10 @@ onUnmounted(() => {
         <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
       </div>
 
+      <AmbientBackdrop
+        :image-src="displayImageSrc || currentDisplayImage.previewPath || currentDisplayImage.thumbPath || currentDisplayImage.path || ''"
+      />
+
       <LightboxToolbar
         :is-open="isOpen"
         :open-tags-on-mount="openTagsOnMount"
@@ -311,11 +361,19 @@ onUnmounted(() => {
         :is-dragging="isDragging"
         :image-counter="imageCounter"
         :stack-current-index="getStackCurrentIndex()"
+        :metadata="metadata"
+        :hud-visible="hudVisible"
+        :images="images"
+        :current-index="currentIndex || 0"
         @prev="goToPrev"
         @next="goToNext"
         @prev-stack="goToPrevStackItem"
         @next-stack="goToNextStackItem"
+        @select-stack="goToStackIndex"
+        @jump-to-index="handleBatchJump"
+        @toggle-overview="batchOverlayOpen = !batchOverlayOpen"
         @reset-zoom="resetZoom"
+        @toggle-hud="toggleHud"
         @viewer-wheel="handleWheel"
         @viewer-mousedown="handleMouseDown"
         @viewer-mousemove="handleMouseMove"
@@ -335,6 +393,15 @@ onUnmounted(() => {
         :groups="favoriteGroups"
         :image="currentDisplayImage"
         @change="$emit('favorite-groups-changed')"
+      />
+
+      <BatchOverview
+        v-if="batchOverlayOpen"
+        :images="images"
+        :current-image="currentDisplayImage"
+        :current-index="currentIndex || 0"
+        @jump="handleBatchJump"
+        @close="batchOverlayOpen = false"
       />
     </div>
   </transition>

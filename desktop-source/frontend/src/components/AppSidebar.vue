@@ -427,7 +427,7 @@ const handleDrawerClick = (subId) => {
 </script>
 
 <template>
-  <aside class="h-full bg-muted/30 border-r flex flex-col transition-all duration-300" :class="collapsed ? 'w-[60px]' : 'w-64'">
+  <aside class="wp-glass h-full bg-muted/30 border-r flex flex-col transition-all duration-300" :class="collapsed ? 'w-[60px]' : 'w-64'">
     
     <!-- Header / Title -->
     <div class="h-16 shrink-0 border-b bg-background/50">

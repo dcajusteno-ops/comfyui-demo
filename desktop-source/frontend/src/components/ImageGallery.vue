@@ -1,6 +1,7 @@
 ﻿<script setup>
 import { ref, computed } from 'vue'
 import ImageCard from './ImageCard.vue'
+import OrbitGallery from './OrbitGallery.vue'
 import Lightbox from './Lightbox.vue'
 import ExportDialog from './ExportDialog.vue'
 import FilterPanel from './FilterPanel.vue'
@@ -15,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
-import { Heart, Grid, Download, BarChart3, Upload, Layers, Search, Sparkles, X } from 'lucide-vue-next'
+import { Heart, Grid, LayoutGrid, Orbit, Download, BarChart3, Upload, Layers, Search, Sparkles, X } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import * as App from '@/api'
 import { useImages } from '@/composables/useImages'
@@ -25,6 +26,14 @@ const { isStackingEnabled, setSortBy, setSortOrder } = useImages()
 const toggleStacking = () => {
   isStackingEnabled.value = !isStackingEnabled.value
   localStorage.setItem('isStackingEnabled', isStackingEnabled.value ? 'true' : 'false')
+}
+
+// grid = 网格；orbit = 3D 环绕（中间一根光柱，图片环绕四周）
+const displayMode = ref(localStorage.getItem('galleryDisplayMode') === 'orbit' ? 'orbit' : 'grid')
+
+const setDisplayMode = mode => {
+  displayMode.value = mode
+  localStorage.setItem('galleryDisplayMode', mode)
 }
 
 const props = defineProps({
@@ -350,6 +359,12 @@ const handleNavigate = (direction) => {
     currentImage.value = props.images[currentImageIndex.value]
 }
 
+const handleJumpToIndex = (index) => {
+    if (index < 0 || index >= props.images.length) return
+    currentImageIndex.value = index
+    currentImage.value = props.images[index]
+}
+
 // Scroll to top when page changes
 const galleryContainer = ref(null)
 // Watch for page changes
@@ -447,7 +462,30 @@ watch(() => props.currentPage, () => {
 
                           <SortDropdown />
 
-                          <div class="flex items-center gap-2 px-2">
+                          <div class="flex items-center gap-0.5 rounded-full border border-border/70 p-0.5">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              class="h-8 w-8 rounded-full"
+                              :class="displayMode === 'grid' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'"
+                              title="网格视图"
+                              @click="setDisplayMode('grid')"
+                            >
+                              <LayoutGrid class="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              class="h-8 w-8 rounded-full"
+                              :class="displayMode === 'orbit' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'"
+                              title="环绕视图（3D）"
+                              @click="setDisplayMode('orbit')"
+                            >
+                              <Orbit class="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          <div v-if="displayMode === 'grid'" class="flex items-center gap-2 px-2">
                             <Grid class="h-4 w-4 text-muted-foreground shrink-0" />
                             <Slider
                               v-model="thumbnailSize"
@@ -535,6 +573,13 @@ watch(() => props.currentPage, () => {
       </div>
 
       <div v-else-if="images.length > 0" class="relative flex-1 min-h-0">
+          <OrbitGallery
+            v-if="displayMode === 'orbit'"
+            :images="images"
+            @view="openLightbox"
+          />
+
+          <template v-else>
           <div ref="galleryContainer" class="h-full overflow-y-auto custom-scrollbar p-6 pb-28">
             <div class="flex flex-col gap-4">
               <div
@@ -562,6 +607,8 @@ watch(() => props.currentPage, () => {
               </div>
             </div>
           </div>
+
+          </template>
 
           <div v-if="totalImages > 0" class="pointer-events-none absolute bottom-4 right-6 z-40 flex justify-end">
             <PaginationControls
@@ -600,6 +647,7 @@ watch(() => props.currentPage, () => {
         :open-tags-on-mount="openTagsOnLightboxOpen"
         @close="lightboxOpen = false; openTagsOnLightboxOpen = false"
         @navigate="handleNavigate"
+        @jump-to-index="handleJumpToIndex"
         @toggle-favorite="(img) => emit('toggle-favorite', img)"
         @add-tag="(img, tagId) => emit('add-tag', img, tagId)"
         @remove-tag="(img, tagId) => emit('remove-tag', img, tagId)"

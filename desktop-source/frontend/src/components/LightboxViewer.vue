@@ -1,7 +1,13 @@
 <script setup>
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight, Loader2, RotateCcw } from 'lucide-vue-next'
+import GroundReflection from './GroundReflection.vue'
+import ImageFilmstrip from './ImageFilmstrip.vue'
+import ImageHud from './ImageHud.vue'
+import StackFan from './StackFan.vue'
+import { useParallaxFloat } from '@/composables/useParallaxFloat'
 
-defineProps({
+const props = defineProps({
   image: { type: Object, default: null },
   currentDisplayImage: { type: Object, default: null },
   canGoPrev: { type: Boolean, default: false },
@@ -16,6 +22,10 @@ defineProps({
   isDragging: { type: Boolean, default: false },
   imageCounter: { type: String, default: '1 / 1' },
   stackCurrentIndex: { type: Number, default: 1 },
+  metadata: { type: Object, default: null },
+  hudVisible: { type: Boolean, default: true },
+  images: { type: Array, default: () => [] },
+  currentIndex: { type: Number, default: 0 },
 })
 
 defineEmits([
@@ -28,7 +38,80 @@ defineEmits([
   'viewer-mousedown',
   'viewer-mousemove',
   'viewer-mouseup',
+  'toggle-hud',
+  'select-stack',
+  'toggle-overview',
+  'jump-to-index',
 ])
+
+const { x: parallaxX, y: parallaxY } = useParallaxFloat({
+  strength: 6,
+  disabled: () => props.scale > 1,
+})
+
+const parallaxStyle = computed(() => ({
+  transform: `translate3d(${parallaxX.value}px, ${parallaxY.value}px, 0)`,
+}))
+
+// 相纸显影：换图时重播一次动画。只切换 class、不重建 img，避免额外闪一下
+const developing = ref(false)
+let developFrame = 0
+
+watch(
+  () => props.currentDisplayImage?.relPath,
+  async () => {
+    developing.value = false
+    if (developFrame) cancelAnimationFrame(developFrame)
+    await nextTick()
+    developFrame = requestAnimationFrame(() => {
+      developFrame = 0
+      developing.value = true
+    })
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => {
+  if (developFrame) cancelAnimationFrame(developFrame)
+})
+
+// 供 HUD 计算「当前视野在原图中的位置」使用
+const stageEl = ref(null)
+const mainImageEl = ref(null)
+const stage = ref({ width: 0, height: 0 })
+const imageSize = ref({ width: 0, height: 0 })
+let resizeObserver = null
+
+const measure = () => {
+  if (stageEl.value) {
+    stage.value = { width: stageEl.value.clientWidth, height: stageEl.value.clientHeight }
+  }
+  if (mainImageEl.value) {
+    imageSize.value = { width: mainImageEl.value.offsetWidth, height: mainImageEl.value.offsetHeight }
+  }
+}
+
+onMounted(() => {
+  measure()
+  if (typeof ResizeObserver === 'undefined') return
+  resizeObserver = new ResizeObserver(measure)
+  if (stageEl.value) resizeObserver.observe(stageEl.value)
+  if (mainImageEl.value) resizeObserver.observe(mainImageEl.value)
+})
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+})
+
+watch(
+  () => props.displayImageSrc,
+  () => {
+    nextTick(measure)
+  },
+)
 </script>
 
 <template>
@@ -49,9 +132,10 @@ defineEmits([
       <ChevronRight class="h-8 w-8" />
     </button>
 
-    <div
-      class="relative flex h-full w-full flex-col items-center justify-center overflow-hidden px-24"
-      :class="{ 'cursor-grab': scale > 1 && !isDragging, 'cursor-grabbing': isDragging }"
+      <div
+        ref="stageEl"
+        class="relative flex h-full w-full flex-col items-center justify-center overflow-hidden px-24"
+        :class="{ 'cursor-grab': scale > 1 && !isDragging, 'cursor-grabbing': isDragging }"
       @wheel="$emit('viewer-wheel', $event)"
       @mousedown="$emit('viewer-mousedown', $event)"
       @mousemove="$emit('viewer-mousemove', $event)"
@@ -65,23 +149,48 @@ defineEmits([
         <Loader2 class="h-4 w-4 animate-spin" />
         <span>正在载入原图</span>
       </div>
-      <div
-        class="relative select-none transition-transform duration-75 ease-out"
-        :style="{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})` }"
-      >
-        <img
-          :src="displayImageSrc || currentDisplayImage?.path"
-          :alt="currentDisplayImage?.name || ''"
-          loading="eager"
-          decoding="async"
-          class="pointer-events-none max-h-[calc(100vh-120px)] max-w-full rounded object-contain shadow-2xl"
-        />
+      <div class="relative select-none" :style="parallaxStyle">
+        <div
+          class="relative select-none transition-transform duration-75 ease-out"
+          :style="{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})` }"
+        >
+          <div class="relative" :class="{ 'paper-develop': developing }">
+            <img
+              ref="mainImageEl"
+              :src="displayImageSrc || currentDisplayImage?.path"
+              :alt="currentDisplayImage?.name || ''"
+              loading="eager"
+              decoding="async"
+              class="pointer-events-none max-h-[calc(100vh-120px)] max-w-full rounded object-contain shadow-2xl"
+              @load="measure"
+            />
+            <GroundReflection :image-src="displayImageSrc || currentDisplayImage?.path" />
+          </div>
+        </div>
       </div>
     </div>
+
+    <ImageFilmstrip
+      :images="images"
+      :current-index="currentIndex"
+      @jump="$emit('jump-to-index', $event)"
+      @toggle-overview="$emit('toggle-overview')"
+    />
+
+    <ImageHud
+      :metadata="metadata"
+      :image-src="displayImageSrc || currentDisplayImage?.path || ''"
+      :scale="scale"
+      :offset="offset"
+      :visible="hudVisible"
+      :stage="stage"
+      :image-size="imageSize"
+      @toggle="$emit('toggle-hud')"
+    />
   </div>
 
   <div
-    class="group absolute bottom-10 left-8 z-[60] flex min-w-[220px] max-w-md flex-col gap-3 rounded-xl border border-white/10 bg-black/70 p-4 text-white shadow-2xl backdrop-blur-xl transition-all hover:bg-black/80"
+    class="group absolute bottom-[4.5rem] left-8 z-[60] flex min-w-[220px] max-w-md flex-col gap-3 rounded-xl border border-white/10 bg-black/70 p-4 text-white shadow-2xl backdrop-blur-xl transition-all hover:bg-black/80"
     @click.stop
   >
     <div class="flex items-center">
@@ -109,31 +218,29 @@ defineEmits([
     </div>
   </div>
 
-  <div
+  <StackFan
     v-if="image?.isStackPrimary && image.stackCount > 1"
-    class="absolute bottom-10 left-[50%] z-[60] flex -translate-x-1/2 items-center gap-4 rounded-xl border border-white/10 bg-black/70 px-4 py-2 shadow-2xl backdrop-blur-xl"
-    @click.stop
-    @wheel.stop
-  >
-    <button
-      class="flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition-all hover:bg-white/20 hover:text-white"
-      @click="$emit('prev-stack')"
-    >
-      <ChevronLeft class="h-5 w-5" />
-    </button>
-
-    <div class="flex flex-col items-center">
-      <span class="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/50">连拍组</span>
-      <span class="text-xs font-mono font-medium text-white/90">
-        {{ stackCurrentIndex }} / {{ image.stackCount }}
-      </span>
-    </div>
-
-    <button
-      class="flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition-all hover:bg-white/20 hover:text-white"
-      @click="$emit('next-stack')"
-    >
-      <ChevronRight class="h-5 w-5" />
-    </button>
-  </div>
+    :image="image"
+    :current-index="stackCurrentIndex"
+    @select="$emit('select-stack', $event)"
+  />
 </template>
+
+<style scoped>
+@keyframes paper-develop {
+  from {
+    opacity: 0;
+    filter: blur(22px) brightness(1.35);
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0) brightness(1);
+    transform: scale(1);
+  }
+}
+
+.paper-develop {
+  animation: paper-develop 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+</style>

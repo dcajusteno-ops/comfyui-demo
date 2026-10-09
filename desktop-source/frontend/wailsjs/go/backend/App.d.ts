@@ -45,6 +45,8 @@ export function ClearPreviewCache():Promise<backend.CacheClearResult>;
 
 export function ClearUserProfileImage():Promise<backend.UserProfile>;
 
+export function ClearWallpaperImage():Promise<backend.WallpaperConfig>;
+
 export function CopyText(arg1:string):Promise<void>;
 
 export function CreateAutoRule(arg1:backend.AutoRule):Promise<backend.AutoRule>;
@@ -139,6 +141,8 @@ export function GetUserProfile():Promise<backend.UserProfile>;
 
 export function GetUtilityMenuSettings():Promise<backend.UtilityMenuState>;
 
+export function GetWallpaper():Promise<backend.WallpaperConfig>;
+
 export function GetWindowBehaviorSettings():Promise<backend.WindowBehaviorSettings>;
 
 export function GetWorkbenchAggregate(arg1:backend.WorkbenchSummaryQuery):Promise<backend.WorkbenchAggregateResult>;
@@ -191,9 +195,13 @@ export function SaveUserProfile(arg1:backend.UserProfile):Promise<backend.UserPr
 
 export function SaveUtilityMenuSettings(arg1:backend.UtilityMenuState):Promise<backend.UtilityMenuState>;
 
+export function SaveWallpaper(arg1:backend.WallpaperConfig):Promise<backend.WallpaperConfig>;
+
 export function SelectFolder():Promise<string>;
 
 export function SelectUserProfileImage():Promise<backend.UserProfile>;
+
+export function SelectWallpaperImage():Promise<backend.WallpaperConfig>;
 
 export function ServeImage(arg1:http.ResponseWriter,arg2:http.Request):Promise<void>;
 

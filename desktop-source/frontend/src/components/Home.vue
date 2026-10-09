@@ -210,6 +210,13 @@ const handleNavigate = (direction) => {
     currentImage.value = list[currentImageIndex.value]
 }
 
+const handleJumpToIndex = (index) => {
+    const list = lightboxContext.value
+    if (index < 0 || index >= list.length) return
+    currentImageIndex.value = index
+    currentImage.value = list[index]
+}
+
 onMounted(async () => {
   pickGreetingMessage()
   await loadStats()
@@ -443,6 +450,7 @@ const navigateToArchive = () => {
         :image-tags="imageTags"
         @close="handleLightboxClose"
         @navigate="handleNavigate"
+        @jump-to-index="handleJumpToIndex"
         @toggle-favorite="toggleFavorite"
         @add-tag="addTagToImage"
         @remove-tag="removeTagFromImage"

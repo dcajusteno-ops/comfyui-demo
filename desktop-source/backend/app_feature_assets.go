@@ -164,6 +164,8 @@ func (a *App) serveImage(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case strings.HasPrefix(path, profileAssetPrefix):
 		absPath, err = a.resolveProfileAssetPath(path)
+	case strings.HasPrefix(path, wallpaperAssetPrefix):
+		absPath, err = a.resolveWallpaperAssetPath(path)
 	case strings.HasPrefix(path, variantAssetPrefix):
 		kind, sourceRelPath, resolveErr := a.resolveVariantSource(path)
 		if resolveErr != nil {

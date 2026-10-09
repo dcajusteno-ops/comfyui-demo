@@ -41,13 +41,29 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/*
+ * 背景壁纸相关令牌
+ * ---------------------------------------------------------------
+ * 会被壁纸「穿透」的四个表面色拆成两层：
+ *   --xxx-base    永远是不透明原值
+ *   --xxx         默认 = base（完全等价于改造前）
+ * 只有 html.has-wallpaper 时，--xxx 才被换成 base 的半透明混合。
+ * 这样壁纸功能关闭时，渲染结果与引入该功能前逐像素一致。
+ * --wp-surface-pct / --wp-page-pct 由 wallpaper.js 按滑块实时注入。
+ */
 :root {
+  --wp-surface-pct: 100%;
+  --wp-page-pct: 100%;
+
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background-base: oklch(1 0 0);
+  --background: var(--background-base);
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card-base: oklch(1 0 0);
+  --card: var(--card-base);
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
+  --popover-base: oklch(1 0 0);
+  --popover: var(--popover-base);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
@@ -66,7 +82,8 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
+  --sidebar-base: oklch(0.985 0 0);
+  --sidebar: var(--sidebar-base);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -77,14 +94,17 @@
 }
 
 .dark {
-  --background: oklch(0.10 0 0);
+  --background-base: oklch(0.10 0 0);
   /* Reduced from 0.145 (darker) */
+  --background: var(--background-base);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.14 0 0);
+  --card-base: oklch(0.14 0 0);
   /* Reduced from 0.205 */
+  --card: var(--card-base);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.14 0 0);
+  --popover-base: oklch(0.14 0 0);
   /* Reduced from 0.205 */
+  --popover: var(--popover-base);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
@@ -108,8 +128,9 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.12 0 0);
+  --sidebar-base: oklch(0.12 0 0);
   /* Reduced from 0.205 */
+  --sidebar: var(--sidebar-base);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -256,6 +277,65 @@
     scrollbar-width: none;
     /* Firefox */
   }
+}
+
+/* ==========================================================================
+   背景壁纸
+   --------------------------------------------------------------------------
+   壁纸铺在 <html> 的背景上（压暗烘进 background 的多层渐变里），不额外加
+   DOM 图层，因此天然在所有内容之下，不存在遮挡交互的问题。
+   面板之所以能透出壁纸，靠的是上面那层「base + 派生」令牌的半透明化。
+   ========================================================================== */
+html.has-wallpaper {
+  --wp-blur: 10px;
+
+  --card: color-mix(in oklab, var(--card-base) var(--wp-surface-pct, 100%), transparent);
+  --popover: color-mix(in oklab, var(--popover-base) var(--wp-surface-pct, 100%), transparent);
+  --sidebar: color-mix(in oklab, var(--sidebar-base) var(--wp-surface-pct, 100%), transparent);
+  --background: color-mix(in oklab, var(--background-base) var(--wp-page-pct, 100%), transparent);
+
+  /* 不透明兜底：填充方式为 contain / auto 时留边露出的底色 */
+  background-color: var(--background-base);
+  background-image: var(--wp-layers, none);
+  background-size: var(--wp-fit, cover);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* 对话框 / 抽屉这类浮层用 panel 档不透明度。
+   它们的组件里写的是 bg-background（页面档），会比卡片透太多，这里统一收回来。 */
+html.has-wallpaper :is(
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"],
+  [data-slot="sheet-content"]
+) {
+  background-color: color-mix(in oklab, var(--popover-base) var(--wp-surface-pct, 100%), transparent);
+}
+
+/* 毛玻璃开关。只作用在少数「浮在内容之上」的大面板上：
+   图库里有几十上百张卡片，逐张加 backdrop-filter 会明显掉帧。 */
+html.has-wallpaper.wp-blur :is(
+  .wp-glass,
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"],
+  [data-slot="sheet-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"],
+  [data-slot="popover-content"]
+) {
+  backdrop-filter: blur(var(--wp-blur, 10px)) saturate(1.12);
+}
+
+/* 沉浸式深色场景（3D 环绕视图这类）底色是写死的深色，不走主题令牌，
+   开壁纸时单独换成半透明，否则整块会把壁纸盖死。
+   倍率比页面档高一些：这类场景里是浅色文字，需要更暗的底才读得清。 */
+html.has-wallpaper .wp-scrim {
+  background-color: color-mix(
+    in oklab,
+    oklch(0.145 0 0) calc(var(--wp-page-pct, 100%) * 1.7),
+    transparent
+  );
 }
 
 /* View Transitions */

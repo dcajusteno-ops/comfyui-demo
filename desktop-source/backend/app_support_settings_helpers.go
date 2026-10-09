@@ -18,7 +18,62 @@ func defaultSettings() Settings {
 		GalleryThumbPreferred:          perf.ThumbPreferred,
 		GalleryBackgroundVariantWarmup: perf.BackgroundVariantWarmup,
 		GalleryMetadataLazy:            perf.MetadataLazy,
+		Wallpaper:                      defaultWallpaperConfig(),
 	}
+}
+
+func defaultWallpaperConfig() WallpaperConfig {
+	return WallpaperConfig{
+		Enabled:      false,
+		ImagePath:    "",
+		Fit:          defaultWallpaperFit,
+		Dim:          defaultWallpaperDim,
+		SurfaceAlpha: defaultWallpaperSurfaceAlpha,
+		Blur:         false,
+	}
+}
+
+// isWallpaperConfigEmpty 判断整块配置是否「从未设置过」。
+// 只有这时才回落到默认值，否则用户把压暗调到 0 会被误判成未设置。
+func isWallpaperConfigEmpty(config WallpaperConfig) bool {
+	return config.ImagePath == "" && config.Fit == "" && config.Dim == 0 &&
+		config.SurfaceAlpha == 0 && !config.Blur && !config.Enabled
+}
+
+func normalizeWallpaperConfig(config WallpaperConfig) WallpaperConfig {
+	defaults := defaultWallpaperConfig()
+	if isWallpaperConfigEmpty(config) {
+		return defaults
+	}
+
+	config.ImagePath = normalizeRelPath(strings.TrimSpace(config.ImagePath))
+
+	switch strings.ToLower(strings.TrimSpace(config.Fit)) {
+	case "cover", "contain", "auto":
+		config.Fit = strings.ToLower(strings.TrimSpace(config.Fit))
+	default:
+		config.Fit = defaults.Fit
+	}
+
+	config.Dim = clampFloatRange(config.Dim, minWallpaperDim, maxWallpaperDim)
+	config.SurfaceAlpha = clampFloatRange(config.SurfaceAlpha, minWallpaperSurfaceAlpha, maxWallpaperSurfaceAlpha)
+
+	// 没有图片就不可能启用
+	if config.ImagePath == "" {
+		config.Enabled = false
+	}
+
+	return config
+}
+
+func clampFloatRange(value, min, max float64) float64 {
+	if value < min {
+		return min
+	}
+	if value > max {
+		return max
+	}
+	return value
 }
 
 func defaultGalleryPerformanceSettings() GalleryPerformanceSettings {

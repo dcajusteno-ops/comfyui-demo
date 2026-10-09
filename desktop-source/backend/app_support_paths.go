@@ -196,6 +196,19 @@ func (a *App) resolveProfileAssetPath(relPath string) (string, error) {
 	return absPath, nil
 }
 
+func (a *App) resolveWallpaperAssetPath(relPath string) (string, error) {
+	cleaned := normalizeRelPath(strings.TrimPrefix(relPath, wallpaperAssetPrefix))
+	if cleaned == "" {
+		return "", fmt.Errorf("wallpaper asset path is empty")
+	}
+
+	absPath := filepath.Clean(filepath.Join(a.wallpaperImageDir(), filepath.FromSlash(cleaned)))
+	if !isSubPath(a.wallpaperImageDir(), absPath) {
+		return "", fmt.Errorf("wallpaper asset path is invalid")
+	}
+	return absPath, nil
+}
+
 func imageVariantFilename(kind, relPath string) string {
 	sum := md5.Sum([]byte(kind + ":" + normalizeRelPath(relPath)))
 	return hex.EncodeToString(sum[:]) + ".png"
@@ -277,6 +290,7 @@ func (a *App) imageMetaCacheFile() string {
 }
 
 func (a *App) profileImageDir() string  { return filepath.Join(a.dataDir, "profile") }
+func (a *App) wallpaperImageDir() string { return filepath.Join(a.dataDir, "wallpaper") }
 func (a *App) imageVariantsDir() string { return filepath.Join(a.dataDir, "image-variants") }
 
 func (a *App) previewVariantsDir() string {

@@ -4,6 +4,7 @@ import { toast } from 'vue-sonner'
 import * as App from '@/api'
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 import { isDark, toggleTheme } from '@/theme'
+import WallpaperPanel from '@/components/WallpaperPanel.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -512,6 +513,8 @@ onUnmounted(() => {
               </div>
             </CardContent>
           </Card>
+
+          <WallpaperPanel />
         </div>
       </div>
     </div>
