@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Button } from '@/components/ui/button'
+import AppSelect from './AppSelect.vue'
 import { CalendarDays, Layers3, Sparkles, Wand2 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -41,6 +42,16 @@ const summaryCards = computed(() => [
 ])
 
 const recentDates = computed(() => (props.summary?.recentDates || []).slice(0, 12))
+
+const modelFilterOptions = computed(() => [
+  { value: '', label: '全部模型' },
+  ...(props.availableModels || []),
+])
+
+const loraFilterOptions = computed(() => [
+  { value: '', label: '全部 LoRA' },
+  ...(props.availableLoras || []),
+])
 
 const hasActiveFilters = computed(() =>
   props.activeDatePreset !== 'all' ||
@@ -162,29 +173,27 @@ const handleQuickDate = (date) => {
             <div class="grid gap-4 lg:grid-cols-2">
               <div>
                 <label class="mb-3 block text-sm font-medium text-foreground">模型</label>
-                <select
-                  :value="activeModelFilter"
-                  class="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary"
-                  @change="emit('update:model-filter', $event.target.value)"
-                >
-                  <option value="">全部模型</option>
-                  <option v-for="item in availableModels" :key="item.value || item.name" :value="item.value || item.name">
-                    {{ item.label || item.name }} ({{ item.count }})
-                  </option>
-                </select>
+                <AppSelect
+                  :model-value="activeModelFilter"
+                  :options="modelFilterOptions"
+                  placeholder="全部模型"
+                  searchable
+                  search-placeholder="搜索模型..."
+                  trigger-class="h-11 w-full rounded-2xl border border-border bg-background px-4 pr-3 text-sm focus:border-primary"
+                  @update:model-value="emit('update:model-filter', $event)"
+                />
               </div>
               <div>
                 <label class="mb-3 block text-sm font-medium text-foreground">LoRA</label>
-                <select
-                  :value="activeLoraFilter"
-                  class="h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary"
-                  @change="emit('update:lora-filter', $event.target.value)"
-                >
-                  <option value="">全部 LoRA</option>
-                  <option v-for="item in availableLoras" :key="item.value || item.name" :value="item.value || item.name">
-                    {{ item.label || item.name }} ({{ item.count }})
-                  </option>
-                </select>
+                <AppSelect
+                  :model-value="activeLoraFilter"
+                  :options="loraFilterOptions"
+                  placeholder="全部 LoRA"
+                  searchable
+                  search-placeholder="搜索 LoRA..."
+                  trigger-class="h-11 w-full rounded-2xl border border-border bg-background px-4 pr-3 text-sm focus:border-primary"
+                  @update:model-value="emit('update:lora-filter', $event)"
+                />
               </div>
             </div>
           </div>

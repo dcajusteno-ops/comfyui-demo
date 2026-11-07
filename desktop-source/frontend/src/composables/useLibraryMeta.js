@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import * as App from '@/api'
 import { normalizeFolderPath } from './useGalleryHelpers'
 
@@ -8,6 +8,16 @@ const imageNotes = ref({})
 const favorites = ref(new Set())
 const favoriteGroups = ref([])
 const activeTagFilter = ref(null)
+
+const tagCounts = computed(() => {
+  const counts = new Map()
+  for (const ids of Object.values(imageTags.value || {})) {
+    for (const id of ids || []) {
+      counts.set(id, (counts.get(id) || 0) + 1)
+    }
+  }
+  return counts
+})
 
 const getFavoritePathSet = (groups) => {
   const set = new Set()
@@ -210,15 +220,7 @@ export function useLibraryMeta({ showToast = () => {}, confirm = async () => fal
     }
   }
 
-  const getTagCount = (tagId) => {
-    let count = 0
-    for (const relPath in imageTags.value) {
-      if (imageTags.value[relPath]?.includes(tagId)) {
-        count++
-      }
-    }
-    return count
-  }
+  const getTagCount = (tagId) => tagCounts.value.get(tagId) || 0
 
   const toggleFavorite = async (img) => {
     if (!img) return

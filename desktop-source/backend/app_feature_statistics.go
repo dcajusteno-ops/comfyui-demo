@@ -13,7 +13,7 @@ func (a *App) GetImageGallerySummary() (ImageGallerySummary, error) {
 		return ImageGallerySummary{}, err
 	}
 
-	totalImages := getManagedImagesCount(a)
+	totalImages := a.managedImagesCountCached()
 	mode, reason := resolveGalleryLoadMode(settingsToGalleryPerformanceSettings(settings), totalImages)
 	thumbFiles, _, thumbBytes, thumbErr := measureDirectoryUsage(a.thumbVariantsDir())
 	if thumbErr != nil && !os.IsNotExist(thumbErr) {

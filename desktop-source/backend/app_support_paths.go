@@ -127,6 +127,7 @@ func (a *App) applyDirectoryBinding(rootDir, outputDir string) error {
 
 	a.rootDir = rootAbs
 	a.imageDir = outputAbs
+	a.invalidateImageCountCache()
 	a.restartImageWatcher()
 	a.scheduleImagesChangedEvent()
 	return nil
@@ -163,6 +164,7 @@ func (a *App) validateDirectoryBinding(rootDir, outputDir string) (string, strin
 func (a *App) restoreDirectoryBinding(rootDir, outputDir string) {
 	a.rootDir = rootDir
 	a.imageDir = outputDir
+	a.invalidateImageCountCache()
 	a.restartImageWatcher()
 }
 
@@ -289,9 +291,9 @@ func (a *App) imageMetaCacheFile() string {
 	return filepath.Join(a.dataDir, "image-meta-cache.json")
 }
 
-func (a *App) profileImageDir() string  { return filepath.Join(a.dataDir, "profile") }
+func (a *App) profileImageDir() string   { return filepath.Join(a.dataDir, "profile") }
 func (a *App) wallpaperImageDir() string { return filepath.Join(a.dataDir, "wallpaper") }
-func (a *App) imageVariantsDir() string { return filepath.Join(a.dataDir, "image-variants") }
+func (a *App) imageVariantsDir() string  { return filepath.Join(a.dataDir, "image-variants") }
 
 func (a *App) previewVariantsDir() string {
 	return filepath.Join(a.imageVariantsDir(), "preview")

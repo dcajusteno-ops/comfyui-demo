@@ -13,7 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { ChevronDown, Plus, Trash2 } from 'lucide-vue-next'
+import AppSelect from './AppSelect.vue'
+import { Plus, Trash2 } from 'lucide-vue-next'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -22,6 +23,11 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:open', 'save', 'delete'])
+
+const matchModeOptions = [
+  { value: 'all', label: '全部满足' },
+  { value: 'any', label: '任一满足' },
+]
 
 const fieldOptions = [
   { value: 'model', label: '模型' },
@@ -180,17 +186,13 @@ const requestDelete = () => {
 
             <div class="grid gap-2">
               <Label for="rule-match-mode">匹配模式</Label>
-              <div class="relative">
-                <select
-                  id="rule-match-mode"
-                  v-model="draft.matchMode"
-                  class="h-11 w-full appearance-none rounded-2xl border border-border/80 bg-background px-4 pr-10 text-sm shadow-none outline-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
-                >
-                  <option value="all">全部满足</option>
-                  <option value="any">任一满足</option>
-                </select>
-                <ChevronDown class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              </div>
+              <AppSelect
+                id="rule-match-mode"
+                v-model="draft.matchMode"
+                :options="matchModeOptions"
+                max-height="10rem"
+                trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
+              />
             </div>
 
             <div class="flex items-end justify-between rounded-[22px] border border-border bg-muted/20 px-4 py-3">
@@ -220,29 +222,19 @@ const requestDelete = () => {
                 :key="`condition-${index}`"
                 class="grid gap-3 rounded-[20px] border border-border/80 bg-background p-3 md:grid-cols-[150px_150px_minmax(0,1fr)_44px]"
               >
-                <div class="relative">
-                  <select
-                    v-model="condition.field"
-                    class="h-11 w-full appearance-none rounded-2xl border border-border/80 bg-background px-4 pr-10 text-sm shadow-none outline-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
-                  >
-                    <option v-for="option in fieldOptions" :key="option.value" :value="option.value">
-                      {{ option.label }}
-                    </option>
-                  </select>
-                  <ChevronDown class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                </div>
+                <AppSelect
+                  v-model="condition.field"
+                  :options="fieldOptions"
+                  max-height="12rem"
+                  trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
+                />
 
-                <div class="relative">
-                  <select
-                    v-model="condition.operator"
-                    class="h-11 w-full appearance-none rounded-2xl border border-border/80 bg-background px-4 pr-10 text-sm shadow-none outline-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
-                  >
-                    <option v-for="option in operatorOptions" :key="option.value" :value="option.value">
-                      {{ option.label }}
-                    </option>
-                  </select>
-                  <ChevronDown class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                </div>
+                <AppSelect
+                  v-model="condition.operator"
+                  :options="operatorOptions"
+                  max-height="12rem"
+                  trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
+                />
 
                 <Input
                   v-model="condition.value"
@@ -281,17 +273,12 @@ const requestDelete = () => {
                 :key="`action-${index}`"
                 class="grid gap-3 rounded-[20px] border border-border/80 bg-background p-3 md:grid-cols-[180px_minmax(0,1fr)_44px]"
               >
-                <div class="relative">
-                  <select
-                    v-model="action.type"
-                    class="h-11 w-full appearance-none rounded-2xl border border-border/80 bg-background px-4 pr-10 text-sm shadow-none outline-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
-                  >
-                    <option v-for="option in actionOptions" :key="option.value" :value="option.value">
-                      {{ option.label }}
-                    </option>
-                  </select>
-                  <ChevronDown class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                </div>
+                <AppSelect
+                  v-model="action.type"
+                  :options="actionOptions"
+                  max-height="12rem"
+                  trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
+                />
 
                 <Input
                   v-model="action.value"

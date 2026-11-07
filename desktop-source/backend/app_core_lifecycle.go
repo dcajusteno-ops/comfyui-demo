@@ -103,6 +103,9 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) shutdown(ctx context.Context) {
+	if err := a.flushImageMetaCacheSave(); err != nil {
+		log.Printf("failed to flush image metadata cache: %v", err)
+	}
 	a.stopImageWatcher()
 	if a.shortcutManager != nil {
 		if err := a.shortcutManager.Close(); err != nil {

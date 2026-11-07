@@ -50,8 +50,7 @@ func (a *App) loadSettings() (Settings, error) {
 }
 
 func (a *App) saveSettings(settings Settings) error {
-	data, _ := json.MarshalIndent(settings, "", "  ")
-	return os.WriteFile(a.settingsFile(), data, 0644)
+	return writeJSONFileAtomic(a.settingsFile(), settings)
 }
 
 func (a *App) GetTrashSettings() (Settings, error) {

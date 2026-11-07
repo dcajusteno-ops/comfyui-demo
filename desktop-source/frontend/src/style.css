@@ -52,6 +52,7 @@
  * --wp-surface-pct / --wp-page-pct 由 wallpaper.js 按滑块实时注入。
  */
 :root {
+  color-scheme: light;
   --wp-surface-pct: 100%;
   --wp-page-pct: 100%;
 
@@ -94,6 +95,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background-base: oklch(0.10 0 0);
   /* Reduced from 0.145 (darker) */
   --background: var(--background-base);
@@ -158,6 +160,20 @@
     /* Redundant but good for safety */
     cursor: url('/cursors/default_small.png'), auto !important;
     user-select: none;
+  }
+
+  /*
+   * 原生下拉弹层（<select> 展开列表、日期选择器、滚动条）不继承页面主题：
+   * WebView2/Chromium 默认按浅色渲染，暗色主题下会出现「浅底 + 白字」的低对比度列表。
+   * color-scheme 让控件本身跟随主题，option 再显式兜底一次背景/文字颜色。
+   */
+  option {
+    background-color: var(--popover-base);
+    color: var(--popover-foreground);
+  }
+
+  option:disabled {
+    color: var(--muted-foreground);
   }
 
   #app,
@@ -325,17 +341,6 @@ html.has-wallpaper.wp-blur :is(
   [data-slot="popover-content"]
 ) {
   backdrop-filter: blur(var(--wp-blur, 10px)) saturate(1.12);
-}
-
-/* 沉浸式深色场景（3D 环绕视图这类）底色是写死的深色，不走主题令牌，
-   开壁纸时单独换成半透明，否则整块会把壁纸盖死。
-   倍率比页面档高一些：这类场景里是浅色文字，需要更暗的底才读得清。 */
-html.has-wallpaper .wp-scrim {
-  background-color: color-mix(
-    in oklab,
-    oklch(0.145 0 0) calc(var(--wp-page-pct, 100%) * 1.7),
-    transparent
-  );
 }
 
 /* View Transitions */

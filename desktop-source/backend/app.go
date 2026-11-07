@@ -22,6 +22,11 @@ type App struct {
 	imageMetaCache         ImageMetaCache
 	imageMetaLoaded        bool
 	imageMetaWarmupRunning bool
+	imageMetaSaveMu        sync.Mutex
+	imageMetaSaveTimer     *time.Timer
+	imageCountMu           sync.Mutex
+	imageCount             int
+	imageCountAt           time.Time
 	promptLibraryMu        sync.RWMutex
 	promptLibraryCache     []PromptLibraryEntry
 	promptLibraryLoaded    bool
@@ -31,4 +36,5 @@ type App struct {
 	imageWatcher           *fsnotify.Watcher
 	imageWatchStop         chan struct{}
 	imageWatchDebounce     *time.Timer
+	imageWatchRestart      *time.Timer
 }

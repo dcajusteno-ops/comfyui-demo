@@ -203,8 +203,7 @@ func (a *App) saveCustomPromptEntries(entries []PromptLibraryEntry) error {
 		}
 		normalized = append(normalized, entry)
 	}
-	data, _ := json.MarshalIndent(normalized, "", "  ")
-	return os.WriteFile(a.customPromptEntriesFile(), data, 0644)
+	return writeJSONFileAtomic(a.customPromptEntriesFile(), normalized)
 }
 
 func (a *App) GetCustomPromptEntries() ([]PromptLibraryEntry, error) {
@@ -297,8 +296,7 @@ func (a *App) loadPromptAssistantState() (PromptAssistantState, error) {
 
 func (a *App) savePromptAssistantState(state PromptAssistantState) error {
 	state = normalizePromptAssistantState(state)
-	data, _ := json.MarshalIndent(state, "", "  ")
-	return os.WriteFile(a.promptAssistantStateFile(), data, 0644)
+	return writeJSONFileAtomic(a.promptAssistantStateFile(), state)
 }
 
 func (a *App) GetPromptAssistantState() (PromptAssistantState, error) {
@@ -324,8 +322,7 @@ func (a *App) loadPromptToolLinks() ([]PromptToolLink, error) {
 }
 
 func (a *App) savePromptToolLinks(links []PromptToolLink) error {
-	data, _ := json.MarshalIndent(links, "", "  ")
-	return os.WriteFile(a.promptToolLinksFile(), data, 0644)
+	return writeJSONFileAtomic(a.promptToolLinksFile(), links)
 }
 
 func (a *App) GetPromptToolLinks() ([]PromptToolLink, error) {
@@ -380,8 +377,7 @@ func (a *App) loadPromptTemplates() ([]PromptTemplate, error) {
 }
 
 func (a *App) savePromptTemplates(templates []PromptTemplate) error {
-	data, _ := json.MarshalIndent(templates, "", "  ")
-	return os.WriteFile(a.promptTemplatesFile(), data, 0644)
+	return writeJSONFileAtomic(a.promptTemplatesFile(), templates)
 }
 
 func (a *App) GetPromptTemplates() ([]PromptTemplate, error) {
@@ -500,7 +496,6 @@ func (a *App) ImportCustomPromptsFromText() (int, error) {
 		}
 	}
 
-
 	customEntries, err := a.loadCustomPromptEntries()
 	if err != nil {
 		customEntries = []PromptLibraryEntry{}
@@ -525,7 +520,6 @@ func (a *App) ImportCustomPromptsFromText() (int, error) {
 
 		normEN := normalizePromptTextKey(entry.TextEN)
 		normZH := normalizePromptTextKey(entry.TextZH)
-
 
 		if (normEN != "" && custSet[normEN]) || (normZH != "" && custSet[normZH]) {
 			continue

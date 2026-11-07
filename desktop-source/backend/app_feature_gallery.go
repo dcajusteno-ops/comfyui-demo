@@ -2,7 +2,6 @@ package backend
 
 import (
 	"io/fs"
-	"log"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -64,26 +63,64 @@ func getManagedImagesCount(a *App) int {
 	return count
 }
 
-func sortImageFiles(images []ImageFile, sortBy, sortOrder string) {
-	sort.Slice(images, func(i, j int) bool {
-		var less bool
-		switch sortBy {
-		case "time":
-			less = images[i].ModTime < images[j].ModTime
-		case "size":
-			less = images[i].Size < images[j].Size
-		case "name":
-			less = images[i].Name < images[j].Name
-		case "dimensions":
-			less = (images[i].Width * images[i].Height) < (images[j].Width * images[j].Height)
-		default:
-			less = images[i].ModTime < images[j].ModTime
-		}
+func (a *App) managedImagesCountCached() int {
+	a.imageCountMu.Lock()
+	if !a.imageCountAt.IsZero() && time.Since(a.imageCountAt) < 3*time.Second {
+		count := a.imageCount
+		a.imageCountMu.Unlock()
+		return count
+	}
+	a.imageCountMu.Unlock()
 
-		if sortOrder == "desc" {
-			return !less
+	count := getManagedImagesCount(a)
+
+	a.imageCountMu.Lock()
+	a.imageCount = count
+	a.imageCountAt = time.Now()
+	a.imageCountMu.Unlock()
+	return count
+}
+
+func (a *App) invalidateImageCountCache() {
+	a.imageCountMu.Lock()
+	a.imageCountAt = time.Time{}
+	a.imageCountMu.Unlock()
+}
+
+func compareInt64(left, right int64) int {
+	switch {
+	case left < right:
+		return -1
+	case left > right:
+		return 1
+	default:
+		return 0
+	}
+}
+
+func sortImageFiles(images []ImageFile, sortBy, sortOrder string) {
+	desc := sortOrder == "desc"
+	sort.SliceStable(images, func(i, j int) bool {
+		var cmp int
+		switch sortBy {
+		case "size":
+			cmp = compareInt64(images[i].Size, images[j].Size)
+		case "name":
+			cmp = strings.Compare(images[i].Name, images[j].Name)
+		case "dimensions":
+			leftArea := int64(images[i].Width) * int64(images[i].Height)
+			rightArea := int64(images[j].Width) * int64(images[j].Height)
+			cmp = compareInt64(leftArea, rightArea)
+		default:
+			cmp = strings.Compare(images[i].ModTime, images[j].ModTime)
 		}
-		return less
+		if cmp == 0 {
+			cmp = strings.Compare(images[i].RelPath, images[j].RelPath)
+		}
+		if desc {
+			return cmp > 0
+		}
+		return cmp < 0
 	})
 }
 
@@ -320,9 +357,7 @@ func (a *App) GetImages(sortBy, sortOrder string) ([]ImageFile, error) {
 
 	a.replaceImageMetaCache(newCache)
 	if cacheChanged {
-		if err := a.saveImageMetaCache(newCache); err != nil {
-			log.Printf("failed to save image metadata cache: %v", err)
-		}
+		a.scheduleImageMetaCacheSave()
 	}
 	if sortBy != "dimensions" {
 		a.scheduleImageMetaWarmup(warmupTasks)
@@ -397,9 +432,7 @@ func (a *App) scheduleImageMetaWarmup(tasks []imageMetaWarmupTask) {
 		}
 
 		if updated {
-			if err := a.saveImageMetaCache(a.snapshotImageMetaCache()); err != nil {
-				log.Printf("failed to save warmed image metadata cache: %v", err)
-			}
+			a.scheduleImageMetaCacheSave()
 			a.scheduleImagesChangedEvent()
 		}
 		if len(autoRuleCandidates) > 0 {
@@ -410,12 +443,6 @@ func (a *App) scheduleImageMetaWarmup(tasks []imageMetaWarmupTask) {
 
 func shouldUseLightweightPagedScan(query GetImagesPageQuery, settings GalleryPerformanceSettings) bool {
 	if !settings.MetadataLazy {
-		return false
-	}
-	if strings.TrimSpace(query.SearchQuery) != "" {
-		return false
-	}
-	if strings.TrimSpace(query.ActiveModelFilter) != "" || strings.TrimSpace(query.ActiveLoraFilter) != "" {
 		return false
 	}
 	if strings.TrimSpace(query.SortBy) == "dimensions" {
@@ -468,6 +495,20 @@ func (a *App) getImagesPageLightweight(query GetImagesPageQuery, settings Galler
 	newCache := make(ImageMetaCache, len(cachedMeta))
 	imageTags, _ := a.loadImageTags()
 	favoriteGroups, _ := a.loadFavoriteGroups()
+
+	normalizedQuery := normalizeSearchValue(query.SearchQuery)
+	targetModelKey := normalizeAssetKey(query.ActiveModelFilter)
+	targetLoraKey := normalizeAssetKey(query.ActiveLoraFilter)
+	var notes ImageNotesMap
+	var tagNameMap map[string]string
+	if normalizedQuery != "" {
+		notes, _ = a.loadImageNotes()
+		tags, _ := a.loadTags()
+		tagNameMap = make(map[string]string, len(tags))
+		for _, tag := range tags {
+			tagNameMap[tag.ID] = tag.Name
+		}
+	}
 
 	filtered := make([]ImageFile, 0, 256)
 	warmupTaskMap := make(map[string]imageMetaWarmupTask)
@@ -537,9 +578,53 @@ func (a *App) getImagesPageLightweight(query GetImagesPageQuery, settings Galler
 			return nil
 		}
 
-		dateKey := extractDateKeyFromRelPath(relPath, info.ModTime())
+		dateKey := extractDateKeyFromRelPath(relPath, info.ModTime().In(time.Local))
 		if !matchesDatePreset(dateKey, query.ActiveDatePreset, query.ActiveDateStart, query.ActiveDateEnd) {
 			return nil
+		}
+
+		if targetModelKey != "" && normalizeAssetKey(entry.Model) != targetModelKey {
+			return nil
+		}
+		if targetLoraKey != "" {
+			matched := false
+			for _, lora := range entry.Loras {
+				if normalizeAssetKey(lora) == targetLoraKey {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				return nil
+			}
+		}
+		if normalizedQuery != "" {
+			tagTexts := make([]string, 0)
+			for _, tagID := range imageTags[relPath] {
+				if name := strings.TrimSpace(tagNameMap[tagID]); name != "" {
+					tagTexts = append(tagTexts, name)
+				}
+			}
+			searchParts := []string{
+				name,
+				relPath,
+				entry.Positive,
+				entry.Model,
+				entry.SearchText,
+				notes[relPath],
+				strings.Join(entry.Loras, " "),
+				strings.Join(tagTexts, " "),
+			}
+			matched := false
+			for _, part := range searchParts {
+				if strings.Contains(normalizeSearchValue(part), normalizedQuery) {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				return nil
+			}
 		}
 
 		filtered = append(filtered, ImageFile{
@@ -569,9 +654,7 @@ func (a *App) getImagesPageLightweight(query GetImagesPageQuery, settings Galler
 
 	a.replaceImageMetaCache(newCache)
 	if cacheChanged {
-		if err := a.saveImageMetaCache(newCache); err != nil {
-			log.Printf("failed to save lightweight image metadata cache: %v", err)
-		}
+		a.scheduleImageMetaCacheSave()
 	}
 
 	sortImageFiles(filtered, query.SortBy, query.SortOrder)
@@ -729,9 +812,7 @@ func (a *App) GetWorkbenchAggregate(query WorkbenchSummaryQuery) (WorkbenchAggre
 	}
 	a.replaceImageMetaCache(newCache)
 	if cacheChanged {
-		if err := a.saveImageMetaCache(newCache); err != nil {
-			log.Printf("failed to save workbench image metadata cache: %v", err)
-		}
+		a.scheduleImageMetaCacheSave()
 	}
 
 	if len(warmupTaskMap) > 0 {
@@ -803,7 +884,7 @@ func (a *App) GetImagesPage(query GetImagesPageQuery) (GetImagesPageResult, erro
 
 	settings, _ := a.loadSettings()
 	performanceSettings := settingsToGalleryPerformanceSettings(settings)
-	mode, reason := resolveGalleryLoadMode(performanceSettings, getManagedImagesCount(a))
+	mode, reason := resolveGalleryLoadMode(performanceSettings, a.managedImagesCountCached())
 	if shouldUseLightweightPagedScan(query, performanceSettings) {
 		return a.getImagesPageLightweight(query, performanceSettings, mode, reason)
 	}

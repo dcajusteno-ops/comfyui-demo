@@ -1,7 +1,7 @@
 ﻿<script setup>
 import { ref, computed } from 'vue'
 import ImageCard from './ImageCard.vue'
-import OrbitGallery from './OrbitGallery.vue'
+import AppSelect from './AppSelect.vue'
 import Lightbox from './Lightbox.vue'
 import ExportDialog from './ExportDialog.vue'
 import FilterPanel from './FilterPanel.vue'
@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
-import { Heart, Grid, LayoutGrid, Orbit, Download, BarChart3, Upload, Layers, Search, Sparkles, X } from 'lucide-vue-next'
+import { Heart, Grid, Download, BarChart3, Upload, Layers, Search, Sparkles, X } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import * as App from '@/api'
 import { useImages } from '@/composables/useImages'
@@ -26,14 +26,6 @@ const { isStackingEnabled, setSortBy, setSortOrder } = useImages()
 const toggleStacking = () => {
   isStackingEnabled.value = !isStackingEnabled.value
   localStorage.setItem('isStackingEnabled', isStackingEnabled.value ? 'true' : 'false')
-}
-
-// grid = 网格；orbit = 3D 环绕（中间一根光柱，图片环绕四周）
-const displayMode = ref(localStorage.getItem('galleryDisplayMode') === 'orbit' ? 'orbit' : 'grid')
-
-const setDisplayMode = mode => {
-  displayMode.value = mode
-  localStorage.setItem('galleryDisplayMode', mode)
 }
 
 const props = defineProps({
@@ -114,6 +106,16 @@ const favoriteDialogImage = ref(null)
 const hasTopFilters = computed(() =>
   !!props.searchQuery || props.hasActiveWorkbenchFilters,
 )
+
+const modelFilterOptions = computed(() => [
+  { value: '', label: '全部模型' },
+  ...(props.availableModels || []),
+])
+
+const loraFilterOptions = computed(() => [
+  { value: '', label: '全部 LoRA' },
+  ...(props.availableLoras || []),
+])
 
 const emptyStateMessage = computed(() => {
   if (props.searchQuery || props.hasActiveWorkbenchFilters) {
@@ -462,30 +464,7 @@ watch(() => props.currentPage, () => {
 
                           <SortDropdown />
 
-                          <div class="flex items-center gap-0.5 rounded-full border border-border/70 p-0.5">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              class="h-8 w-8 rounded-full"
-                              :class="displayMode === 'grid' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'"
-                              title="网格视图"
-                              @click="setDisplayMode('grid')"
-                            >
-                              <LayoutGrid class="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              class="h-8 w-8 rounded-full"
-                              :class="displayMode === 'orbit' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'"
-                              title="环绕视图（3D）"
-                              @click="setDisplayMode('orbit')"
-                            >
-                              <Orbit class="h-4 w-4" />
-                            </Button>
-                          </div>
-
-                          <div v-if="displayMode === 'grid'" class="flex items-center gap-2 px-2">
+                          <div class="flex items-center gap-2 px-2">
                             <Grid class="h-4 w-4 text-muted-foreground shrink-0" />
                             <Slider
                               v-model="thumbnailSize"
@@ -514,26 +493,24 @@ watch(() => props.currentPage, () => {
                     <span class="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground">
                       日期：{{ activeDateLabel || '全部时间' }}
                     </span>
-                    <select
-                      :value="activeModelFilter"
-                      class="h-9 min-w-[180px] rounded-full border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary"
-                      @change="emit('update:model-filter', $event.target.value)"
-                    >
-                      <option value="">全部模型</option>
-                      <option v-for="item in availableModels" :key="item.value || item.name" :value="item.value || item.name">
-                        {{ item.label || item.name }} ({{ item.count }})
-                      </option>
-                    </select>
-                    <select
-                      :value="activeLoraFilter"
-                      class="h-9 min-w-[180px] rounded-full border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary"
-                      @change="emit('update:lora-filter', $event.target.value)"
-                    >
-                      <option value="">全部 LoRA</option>
-                      <option v-for="item in availableLoras" :key="item.value || item.name" :value="item.value || item.name">
-                        {{ item.label || item.name }} ({{ item.count }})
-                      </option>
-                    </select>
+                    <AppSelect
+                      :model-value="activeModelFilter"
+                      :options="modelFilterOptions"
+                      placeholder="全部模型"
+                      searchable
+                      search-placeholder="搜索模型..."
+                      trigger-class="h-9 min-w-[180px] rounded-full border border-border bg-background px-3 pr-2 text-sm focus:border-primary"
+                      @update:model-value="emit('update:model-filter', $event)"
+                    />
+                    <AppSelect
+                      :model-value="activeLoraFilter"
+                      :options="loraFilterOptions"
+                      placeholder="全部 LoRA"
+                      searchable
+                      search-placeholder="搜索 LoRA..."
+                      trigger-class="h-9 min-w-[180px] rounded-full border border-border bg-background px-3 pr-2 text-sm focus:border-primary"
+                      @update:model-value="emit('update:lora-filter', $event)"
+                    />
                     <Button
                       v-if="hasActiveWorkbenchFilters"
                       variant="outline"
@@ -573,13 +550,6 @@ watch(() => props.currentPage, () => {
       </div>
 
       <div v-else-if="images.length > 0" class="relative flex-1 min-h-0">
-          <OrbitGallery
-            v-if="displayMode === 'orbit'"
-            :images="images"
-            @view="openLightbox"
-          />
-
-          <template v-else>
           <div ref="galleryContainer" class="h-full overflow-y-auto custom-scrollbar p-6 pb-28">
             <div class="flex flex-col gap-4">
               <div
@@ -607,8 +577,6 @@ watch(() => props.currentPage, () => {
               </div>
             </div>
           </div>
-
-          </template>
 
           <div v-if="totalImages > 0" class="pointer-events-none absolute bottom-4 right-6 z-40 flex justify-end">
             <PaginationControls

@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onScopeDispose } from 'vue'
 import * as App from '@/api'
 import { useImageStacks } from './useImageStacks'
 import { useGalleryData } from './useGalleryData'
@@ -30,7 +30,22 @@ const sortBy = ref(localStorage.getItem('sortBy') || 'time')
 const sortOrder = ref(localStorage.getItem('sortOrder') || 'desc')
 const isStackingEnabled = ref(localStorage.getItem('isStackingEnabled') !== 'false') // default true
 
-export function useImages(showToast = () => {}, confirm = async () => false) {
+const modTimeMs = (value) => {
+  const ts = Date.parse(value || '')
+  return Number.isNaN(ts) ? 0 : ts
+}
+
+const latestModTime = (imgs) => {
+  let max = 0
+  for (const img of imgs || []) {
+    const ts = modTimeMs(img?.modTime)
+    if (ts > max) max = ts
+  }
+  return max
+}
+
+export function useImages(showToast = () => {}, confirm = async () => false, options = {}) {
+  const manageWatchers = options?.manageWatchers === true
   const {
     images,
     indexedImages,
@@ -197,7 +212,7 @@ export function useImages(showToast = () => {}, confirm = async () => false) {
       children: [],
       subs: [],
       images: imgs,
-      lastMod: imgs.length > 0 ? Math.max(...imgs.map((img) => new Date(img.modTime).getTime())) : 0,
+      lastMod: latestModTime(imgs),
     })
 
     const sortNodes = (nodes = []) => {
@@ -253,7 +268,7 @@ export function useImages(showToast = () => {}, confirm = async () => false) {
       )
 
       rootNode.lastMod = Math.max(
-        rootNode.images.length ? Math.max(...rootNode.images.map((img) => new Date(img.modTime).getTime())) : 0,
+        latestModTime(rootNode.images),
         rootNode.children.length ? Math.max(...rootNode.children.map((child) => child.lastMod || 0)) : 0,
       )
       sortNodes(rootNode.children)
@@ -351,7 +366,7 @@ export function useImages(showToast = () => {}, confirm = async () => false) {
       sortNodes(rootNode.children)
       rootNode.subs = rootNode.children
       rootNode.lastMod = Math.max(
-        rootNode.images.length ? Math.max(...rootNode.images.map((img) => new Date(img.modTime).getTime())) : 0,
+        latestModTime(rootNode.images),
         rootNode.children.length ? Math.max(...rootNode.children.map((child) => child.lastMod || 0)) : 0,
       )
       return rootNode
@@ -430,7 +445,7 @@ export function useImages(showToast = () => {}, confirm = async () => false) {
         const normalizedGroupPaths = new Set((group.paths || []).map((path) => normalizeFolderPath(path)))
         const groupImages = imagesToUse
           .filter((img) => normalizedGroupPaths.has(normalizeFolderPath(img.relPath)))
-          .sort((a, b) => new Date(b.modTime) - new Date(a.modTime))
+          .sort((a, b) => modTimeMs(b.modTime) - modTimeMs(a.modTime))
         return {
           name: group.name,
           id: `favorite-group:${group.id}`,
@@ -440,7 +455,7 @@ export function useImages(showToast = () => {}, confirm = async () => false) {
           children: [],
           subs: [],
           images: groupImages,
-          lastMod: groupImages.length ? Math.max(...groupImages.map((img) => new Date(img.modTime).getTime())) : 0,
+          lastMod: latestModTime(groupImages),
           count: groupImages.length,
           isFavoriteGroup: true,
         }
@@ -578,7 +593,7 @@ const toggleRoot = (name) => {
 
     if (activeRoot.value === 'favorites') {
       const imgs = activeSourceImages.filter((img) => favorites.value.has(normalizeFolderPath(img.relPath)))
-      imgs.sort((a, b) => new Date(b.modTime) - new Date(a.modTime))
+      imgs.sort((a, b) => modTimeMs(b.modTime) - modTimeMs(a.modTime))
       if (!activeSub.value) return imgs
 
       const groupId = activeSub.value.startsWith('favorite-group:')
@@ -655,20 +670,22 @@ const toggleRoot = (name) => {
     return query
   }
 
-  const mapLoadedImage = (img) => ({
-    ...img,
-    path: buildImageDisplayPath(img.path, img.modTime, img.size),
-    thumbPath: buildImageDisplayPath(img.thumbPath, img.modTime, img.size),
-    previewPath: buildImageDisplayPath(img.previewPath, img.modTime, img.size),
-    cardPath:
-      galleryLoadMode.value === 'performance' &&
-      performanceSettings.value.thumbPreferred &&
-      buildImageDisplayPath(img.thumbPath, img.modTime, img.size)
-        ? buildImageDisplayPath(img.thumbPath, img.modTime, img.size)
-        : buildImageDisplayPath(img.path, img.modTime, img.size),
-    loras: Array.isArray(img.loras) ? img.loras : [],
-    isFavorite: favorites.value.has(normalizeFolderPath(img.relPath)),
-  })
+  const mapLoadedImage = (img) => {
+    const path = buildImageDisplayPath(img.path, img.modTime, img.size)
+    const thumbPath = buildImageDisplayPath(img.thumbPath, img.modTime, img.size)
+    const previewPath = buildImageDisplayPath(img.previewPath, img.modTime, img.size)
+    const preferThumb =
+      galleryLoadMode.value === 'performance' && performanceSettings.value.thumbPreferred
+    return {
+      ...img,
+      path,
+      thumbPath,
+      previewPath,
+      cardPath: preferThumb && thumbPath ? thumbPath : path,
+      loras: Array.isArray(img.loras) ? img.loras : [],
+      isFavorite: favorites.value.has(normalizeFolderPath(img.relPath)),
+    }
+  }
 
   const ensureStandardImagesReady = async () => {
     await ensureGalleryStandardImagesReady({ fetchImagesFn: fetchImages })
@@ -822,77 +839,94 @@ const toggleRoot = (name) => {
     fetchImagesPageFn: fetchImagesPage,
   })
 
-  watch([activeRoot, activeSub, activeChild], () => {
-    resetPage()
-    refreshGalleryMode()
-    if (galleryLoadMode.value === 'performance') {
-      fetchImagesPage({ page: 1 })
-    }
-  })
+  if (manageWatchers) {
+    let searchTimer = 0
+    let filtersTimer = 0
+    onScopeDispose(() => {
+      if (searchTimer) clearTimeout(searchTimer)
+      if (filtersTimer) clearTimeout(filtersTimer)
+    })
 
-  watch(searchQuery, (value) => {
-    localStorage.setItem('gallerySearchQuery', value)
-    resetPage()
-    if (galleryLoadMode.value === 'performance') {
-      fetchImagesPage({ page: 1 })
-    }
-  })
-
-  watch(availableModels, (options) => {
-    const syncedValue = syncGroupedFilterValue(activeModelFilter.value, options)
-    if (activeModelFilter.value && !syncedValue) {
-      activeModelFilter.value = ''
-      return
-    }
-    if (syncedValue && activeModelFilter.value !== syncedValue) {
-      activeModelFilter.value = syncedValue
-    }
-  }, { immediate: true })
-
-  watch(availableLoras, (options) => {
-    const syncedValue = syncGroupedFilterValue(activeLoraFilter.value, options)
-    if (activeLoraFilter.value && !syncedValue) {
-      activeLoraFilter.value = ''
-      return
-    }
-    if (syncedValue && activeLoraFilter.value !== syncedValue) {
-      activeLoraFilter.value = syncedValue
-    }
-  }, { immediate: true })
-
-  watch(
-    [activeDatePreset, activeDateStart, activeDateEnd, activeModelFilter, activeLoraFilter],
-    () => {
+    watch([activeRoot, activeSub, activeChild], () => {
       resetPage()
-      fetchWorkbenchAggregate()
+      refreshGalleryMode()
       if (galleryLoadMode.value === 'performance') {
         fetchImagesPage({ page: 1 })
       }
-    },
-  )
+    })
 
-  watch(activeTagFilter, () => {
-    resetPage()
-    if (galleryLoadMode.value === 'performance') {
-      fetchImagesPage({ page: 1 })
-    }
-  })
+    watch(searchQuery, (value) => {
+      localStorage.setItem('gallerySearchQuery', value)
+      resetPage()
+      if (searchTimer) clearTimeout(searchTimer)
+      searchTimer = window.setTimeout(() => {
+        searchTimer = 0
+        if (galleryLoadMode.value === 'performance') {
+          fetchImagesPage({ page: 1 })
+        }
+      }, 300)
+    })
 
-  watch(filters, async () => {
-    refreshGalleryMode()
-    if (galleryLoadMode.value === 'performance') {
-      await fetchImagesPage({ page: 1 })
-      return
-    }
-    await ensureStandardImagesReady()
-  }, { deep: true })
+    watch(availableModels, (options) => {
+      const syncedValue = syncGroupedFilterValue(activeModelFilter.value, options)
+      if (activeModelFilter.value && !syncedValue) {
+        activeModelFilter.value = ''
+        return
+      }
+      if (syncedValue && activeModelFilter.value !== syncedValue) {
+        activeModelFilter.value = syncedValue
+      }
+    }, { immediate: true })
 
-  watch([effectivePreferredMode, supportsPagedGalleryView], async () => {
-    refreshGalleryMode()
-    if (galleryLoadMode.value === 'standard') {
-      await ensureStandardImagesReady()
-    }
-  })
+    watch(availableLoras, (options) => {
+      const syncedValue = syncGroupedFilterValue(activeLoraFilter.value, options)
+      if (activeLoraFilter.value && !syncedValue) {
+        activeLoraFilter.value = ''
+        return
+      }
+      if (syncedValue && activeLoraFilter.value !== syncedValue) {
+        activeLoraFilter.value = syncedValue
+      }
+    }, { immediate: true })
+
+    watch(
+      [activeDatePreset, activeDateStart, activeDateEnd, activeModelFilter, activeLoraFilter],
+      () => {
+        resetPage()
+        fetchWorkbenchAggregate()
+        if (galleryLoadMode.value === 'performance') {
+          fetchImagesPage({ page: 1 })
+        }
+      },
+    )
+
+    watch(activeTagFilter, () => {
+      resetPage()
+      if (galleryLoadMode.value === 'performance') {
+        fetchImagesPage({ page: 1 })
+      }
+    })
+
+    watch(filters, () => {
+      if (filtersTimer) clearTimeout(filtersTimer)
+      filtersTimer = window.setTimeout(async () => {
+        filtersTimer = 0
+        refreshGalleryMode()
+        if (galleryLoadMode.value === 'performance') {
+          await fetchImagesPage({ page: 1 })
+          return
+        }
+        await ensureStandardImagesReady()
+      }, 250)
+    }, { deep: true })
+
+    watch([effectivePreferredMode, supportsPagedGalleryView], async () => {
+      refreshGalleryMode()
+      if (galleryLoadMode.value === 'standard') {
+        await ensureStandardImagesReady()
+      }
+    })
+  }
 
   const clearSearchQuery = () => {
     searchQuery.value = ''

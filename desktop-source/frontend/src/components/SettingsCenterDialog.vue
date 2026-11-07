@@ -56,6 +56,7 @@ import {
   shortcutActionCatalog,
   shortcutActionMap,
 } from '@/lib/shortcuts'
+import AppSelect from './AppSelect.vue'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -77,6 +78,12 @@ const sections = [
   { id: 'favorites', label: '收藏分组', icon: Heart, description: '整理收藏夹结构' },
   { id: 'shortcuts', label: '快捷键设置', icon: Keyboard, description: '调整全局快捷键' },
   { id: 'health', label: '目录健康', icon: ShieldCheck, description: '缓存与引用检查' },
+]
+
+const performanceModeOptions = [
+  { value: 'auto', label: '自动' },
+  { value: 'standard', label: '标准' },
+  { value: 'performance', label: '性能优先' },
 ]
 
 const activeSection = ref('appearance')
@@ -701,11 +708,11 @@ onUnmounted(() => {
                   <div class="grid gap-4 md:grid-cols-2">
                     <label class="space-y-2">
                       <div class="text-sm font-medium">当前模式</div>
-                      <select v-model="performanceForm.mode" class="h-10 w-full rounded-xl border bg-background px-3 text-sm">
-                        <option value="auto">自动</option>
-                        <option value="standard">标准</option>
-                        <option value="performance">性能优先</option>
-                      </select>
+                      <AppSelect
+                        v-model="performanceForm.mode"
+                        :options="performanceModeOptions"
+                        trigger-class="h-10 w-full rounded-xl border bg-background px-3 pr-2 text-sm"
+                      />
                     </label>
                     <label class="space-y-2">
                       <div class="text-sm font-medium">首屏加载数量</div>

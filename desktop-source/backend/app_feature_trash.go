@@ -186,8 +186,7 @@ func (a *App) migrateLegacyTrash() error {
 }
 
 func (a *App) saveTrashMetadata(meta TrashMetadataMap) error {
-	data, _ := json.MarshalIndent(meta, "", "  ")
-	return os.WriteFile(a.trashMetadataFile(), data, 0644)
+	return writeJSONFileAtomic(a.trashMetadataFile(), meta)
 }
 
 func (a *App) cleanExpiredTrash() error {

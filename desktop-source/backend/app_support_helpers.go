@@ -2,6 +2,7 @@ package backend
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -12,6 +13,25 @@ import (
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
+
+// writeJSONFileAtomic 先写临时文件再 rename，避免进程中断时把配置写成半截 JSON。
+func writeJSONFileAtomic(path string, value any) error {
+	data, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	tempPath := path + ".tmp"
+	if err := os.WriteFile(tempPath, data, 0644); err != nil {
+		_ = os.Remove(tempPath)
+		return err
+	}
+	if err := os.Rename(tempPath, path); err != nil {
+		_ = os.Remove(tempPath)
+		return err
+	}
+	return nil
+}
 
 func moveFile(sourcePath, destPath string) error {
 	err := os.Rename(sourcePath, destPath)
@@ -83,10 +103,12 @@ func normalizeAssetKey(value string) string {
 	return collapseSpaces(normalized)
 }
 
+var dateFolderPattern = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+
 func extractDateKeyFromRelPath(relPath string, modTime time.Time) string {
 	parts := strings.Split(normalizeRelPath(relPath), "/")
 	for _, part := range parts {
-		if matched, _ := regexp.MatchString(`^\d{4}-\d{2}-\d{2}$`, part); matched {
+		if dateFolderPattern.MatchString(part) {
 			return part
 		}
 	}

@@ -129,8 +129,7 @@ func (a *App) loadFavoriteGroups() ([]FavoriteGroup, error) {
 
 func (a *App) saveFavoriteGroups(groups []FavoriteGroup) error {
 	store := favoriteGroupsStore{Groups: normalizeFavoriteGroups(groups)}
-	data, _ := json.MarshalIndent(store, "", "  ")
-	return os.WriteFile(a.favoritesFile(), data, 0644)
+	return writeJSONFileAtomic(a.favoritesFile(), store)
 }
 
 func (a *App) loadFavorites() ([]string, error) {

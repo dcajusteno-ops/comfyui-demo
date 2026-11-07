@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import AppSelect from './AppSelect.vue'
 import {
   BarChart3,
   Camera,
@@ -428,11 +429,12 @@ onUnmounted(() => {
 
             <div class="grid gap-2 md:max-w-[320px]">
               <Label for="profile-start-page">默认进入页</Label>
-              <select id="profile-start-page" v-model="profile.preferredStartPage" :class="`${profileControlClass} h-11 appearance-none`">
-                <option v-for="option in startPageOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </option>
-              </select>
+              <AppSelect
+                id="profile-start-page"
+                v-model="profile.preferredStartPage"
+                :options="startPageOptions"
+                :trigger-class="`${profileControlClass} h-11`"
+              />
             </div>
 
             <div class="flex flex-wrap items-center gap-3 border-t border-border pt-2">

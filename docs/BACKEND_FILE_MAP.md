@@ -1,7 +1,7 @@
 # 后端文件地图
 
-最后更新：`2026-10-09`  
-适用版本：`v3.2.0`
+最后更新：`2026-11-07`  
+适用版本：`v3.3.0`
 
 这份文档说明 `desktop-source/backend/` 下当前 Go 文件的组织方式。
 
@@ -250,4 +250,15 @@ Wails 桌面应用入口。
 - 新增功能优先归入现有分组，不继续深拆 package
 - `app.go` 继续保持“壳子化”
 - 如果功能是对前端直接暴露的业务接口，优先归到 `app_feature_*`
+
+## 8. 测试文件
+
+`v3.3.0` 起补充了纯函数单元测试，不启动 Wails、不读写真实用户目录：
+
+- `app_feature_gallery_test.go`
+  排序、目录范围匹配、分页结果
+- `app_support_helpers_test.go`
+  路径规范化、日期解析、JSON 特殊值清洗、变体文件名
+- `app_support_metadata_cache_test.go`
+  元缓存紧凑 JSON 与原子替换写盘
 

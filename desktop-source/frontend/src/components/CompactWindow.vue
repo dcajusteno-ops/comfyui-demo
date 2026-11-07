@@ -37,6 +37,7 @@ import {
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import AppSelect from './AppSelect.vue'
 import * as App from '@/api'
 import { useImageZoom } from '@/composables/useImageZoom'
 
@@ -59,6 +60,24 @@ const viewMode = ref('recent')
 const displayMode = ref(localStorage.getItem('compactDisplayMode') || 'list')
 const dateFilter = ref('all')
 const sortMode = ref('newest')
+const compactDateOptions = [
+  { value: 'all', label: '全部时间' },
+  { value: 'today', label: '今天' },
+  { value: 'week', label: '最近 7 天' },
+  { value: 'month', label: '本月' },
+]
+const compactSortOptions = [
+  { value: 'newest', label: '最新优先' },
+  { value: 'oldest', label: '最旧优先' },
+  { value: 'size-desc', label: '体积从大到小' },
+  { value: 'size-asc', label: '体积从小到大' },
+  { value: 'name', label: '文件名' },
+]
+const compactPageSizeOptions = [
+  { value: 60, label: '60 / 页' },
+  { value: 120, label: '120 / 页' },
+  { value: 240, label: '240 / 页' },
+]
 const selectionMode = ref(false)
 const controlsOpen = ref(false)
 const folderPanelOpen = ref(false)
@@ -327,6 +346,10 @@ const selectedTags = computed(() => selectedTagIds.value.map((tagId) => tagById.
 const availableTagsToAdd = computed(() =>
   (props.tags || []).filter((tag) => tag?.id && !selectedTagIds.value.includes(tag.id)),
 )
+const tagAddOptions = computed(() => [
+  { value: '', label: '选择标签' },
+  ...availableTagsToAdd.value.map((tag) => ({ value: tag.id, label: tag.name })),
+])
 const selectedNote = computed(() => getImageNote(selectedImage.value))
 const noteDirty = computed(() => noteDraft.value !== selectedNote.value)
 const detailImageSrc = computed(() => getImageSrc(selectedImage.value))
@@ -965,12 +988,14 @@ const folderRowStyle = (row) => ({
           </div>
           <div v-else class="mt-2 text-[11px] text-muted-foreground">暂无标签</div>
           <div v-if="availableTagsToAdd.length" class="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-            <select v-model="tagAddId" class="h-8 min-w-0 rounded-md border bg-background px-2 text-xs">
-              <option value="">选择标签</option>
-              <option v-for="tagItem in availableTagsToAdd" :key="tagItem.id" :value="tagItem.id">
-                {{ tagItem.name }}
-              </option>
-            </select>
+            <AppSelect
+              v-model="tagAddId"
+              :options="tagAddOptions"
+              searchable
+              search-placeholder="搜索标签..."
+              max-height="12rem"
+              trigger-class="h-8 w-full min-w-0 rounded-md border bg-background px-2 pr-1 text-xs"
+            />
             <Button variant="outline" class="h-8 px-3 text-xs" :disabled="!tagAddId || actionBusy === 'add-tag'" @click="addSelectedTag">
               添加
             </Button>
@@ -1150,24 +1175,25 @@ const folderRowStyle = (row) => ({
         </div>
 
         <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_92px_auto_auto] gap-1.5">
-          <select v-model="dateFilter" class="h-8 min-w-0 rounded-md border bg-background px-2 text-xs">
-            <option value="all">全部时间</option>
-            <option value="today">今天</option>
-            <option value="week">最近 7 天</option>
-            <option value="month">本月</option>
-          </select>
-          <select v-model="sortMode" class="h-8 min-w-0 rounded-md border bg-background px-2 text-xs">
-            <option value="newest">最新优先</option>
-            <option value="oldest">最旧优先</option>
-            <option value="size-desc">体积从大到小</option>
-            <option value="size-asc">体积从小到大</option>
-            <option value="name">文件名</option>
-          </select>
-          <select v-model.number="pageSize" class="h-8 min-w-0 rounded-md border bg-background px-2 text-xs" title="每页数量">
-            <option :value="60">60 / 页</option>
-            <option :value="120">120 / 页</option>
-            <option :value="240">240 / 页</option>
-          </select>
+          <AppSelect
+            v-model="dateFilter"
+            :options="compactDateOptions"
+            max-height="10rem"
+            trigger-class="h-8 w-full min-w-0 rounded-md border bg-background px-2 pr-1 text-xs"
+          />
+          <AppSelect
+            v-model="sortMode"
+            :options="compactSortOptions"
+            max-height="10rem"
+            trigger-class="h-8 w-full min-w-0 rounded-md border bg-background px-2 pr-1 text-xs"
+          />
+          <AppSelect
+            v-model="pageSize"
+            :options="compactPageSizeOptions"
+            max-height="10rem"
+            trigger-class="h-8 w-full min-w-0 rounded-md border bg-background px-2 pr-1 text-xs"
+            title="每页数量"
+          />
           <Button variant="outline" size="icon" class="h-8 w-8 rounded-md" title="Output" :disabled="actionBusy === 'open-output'" @click="openOutputFolder">
             <FolderOpen class="h-3.5 w-3.5" />
           </Button>

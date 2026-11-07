@@ -546,17 +546,7 @@ func extractNodePromptTexts(node comfyPromptNode) (string, string) {
 		negative = joinMetadataTexts(extraParts...)
 	}
 
-	lowerClass := strings.ToLower(node.ClassType)
-	lowerTitle := strings.ToLower(strings.TrimSpace(node.Meta.Title))
-	looksNegative := strings.Contains(lowerClass, "negative") ||
-		strings.Contains(lowerTitle, "negative") ||
-		strings.Contains(node.Meta.Title, "璐熼潰") ||
-		strings.Contains(node.Meta.Title, "鍙嶅悜")
-	looksPositive := strings.Contains(lowerClass, "positive") ||
-		strings.Contains(lowerTitle, "positive") ||
-		strings.Contains(node.Meta.Title, "姝ｅ悜") ||
-		strings.Contains(node.Meta.Title, "姝ｉ潰")
-	looksPositive, looksNegative = promptDirectionHints(node)
+	looksPositive, looksNegative := promptDirectionHints(node)
 	if negative == "" && positive != "" && looksNegative {
 		negative = positive
 		positive = ""

@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator'
 import {
   BookOpen,
   CalendarDays,
+  ChevronDown,
   Clock3,
   Filter,
   FolderTree,
@@ -13,7 +14,6 @@ import {
   Images,
   Keyboard,
   LayoutDashboard,
-  Orbit,
   PencilRuler,
   Search,
   Settings2,
@@ -50,9 +50,9 @@ const featureCards = [
     description: '氛围光晕与地面倒影、底部缩略图导航条、批次概览层、参数 HUD、3D 层叠连拍组，看图细节一次补齐。',
   },
   {
-    icon: Orbit,
-    title: '3D 环绕预览',
-    description: '图库可切换「网格 / 环绕」视图：图片沿中央光柱多层环绕，拖动旋转、滚轮上下滚动，每圈张数可调。',
+    icon: ChevronDown,
+    title: '可搜索下拉菜单',
+    description: '模型 / LoRA / 标签下拉支持输入关键字搜索，固定宽度并自动适配深色 / 浅色主题。',
   },
   {
     icon: Wallpaper,
@@ -156,14 +156,6 @@ const quickGuides = [
     ],
   },
   {
-    title: '用环绕模式逛一遍图库',
-    steps: [
-      '在图库工具栏把视图从“网格”切到“环绕”。',
-      '拖动旋转看整体分布，滚轮上下滚动看塔的上下层，空闲时会自动缓慢旋转。',
-      '左上角调整每圈张数：张数少塔就高，可以滚着逛；调大则更紧凑。',
-    ],
-  },
-  {
     title: '换一张背景壁纸',
     steps: [
       '进入个人中心，在“外观与偏好”下面找到“背景壁纸”。',
@@ -230,7 +222,7 @@ const faqs = [
       <BookOpen class="mr-3 h-5 w-5 text-primary" />
       <div class="flex items-center gap-3">
         <h1 class="text-xl font-bold tracking-tight">使用文档</h1>
-        <Badge variant="outline" class="rounded-full px-3 py-1 text-xs">v3.2.0</Badge>
+        <Badge variant="outline" class="rounded-full px-3 py-1 text-xs">v3.3.0</Badge>
       </div>
     </div>
 
@@ -242,11 +234,11 @@ const faqs = [
               <Clock3 class="h-4 w-4" />
               <span>当前版本说明</span>
             </div>
-            <h2 class="text-3xl font-semibold tracking-tight">v3.2.0 使用说明</h2>
+            <h2 class="text-3xl font-semibold tracking-tight">v3.3.0 使用说明</h2>
             <p class="max-w-3xl text-sm leading-7 text-muted-foreground">
               你现在看到的软件内文档已经与 GitHub README、发布说明、安装器版本和当前桌面程序同步到
-              <span class="font-medium text-foreground">v3.2.0</span>。这一版是一次围绕“看图体验”的更新：重做了大图查看器（氛围光晕与倒影、缩略图导航条、
-              批次概览层、参数 HUD、层叠连拍组），给图库加了 3D 环绕预览模式，并新增了背景壁纸自定义。
+              <span class="font-medium text-foreground">v3.3.0</span>。这一版聚焦图库体验与性能：移除 3D 环绕视图、重做全项目下拉菜单（支持搜索），
+              并优化了大型图库的加载、筛选与自动刷新。
             </p>
           </div>
         </section>
@@ -355,7 +347,7 @@ const faqs = [
         </section>
 
         <div class="pt-4 text-center text-sm text-muted-foreground">
-          Comfy Manager v3.2.0 / 面向 ComfyUI 出图整理、大图查看、灵动小窗、目录治理与提示词工作流
+          Comfy Manager v3.3.0 / 面向 ComfyUI 出图整理、大图查看、灵动小窗、目录治理与提示词工作流
         </div>
       </div>
     </div>

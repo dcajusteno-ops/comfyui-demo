@@ -14,6 +14,9 @@ import (
 	"golang.org/x/image/draw"
 )
 
+// 限制同时在解码/缩放原图的协程数，避免首屏大量 <img> 请求把 4K 图同时解码进内存。
+var variantGenerationLimiter = make(chan struct{}, 4)
+
 func scaledImageDimensions(width, height, maxDimension int) (int, int) {
 	if width <= 0 || height <= 0 || maxDimension <= 0 {
 		return 0, 0
@@ -65,6 +68,9 @@ func (a *App) ensureImageVariant(kind, relPath string) (string, error) {
 		return variantPath, nil
 	}
 
+	variantGenerationLimiter <- struct{}{}
+	defer func() { <-variantGenerationLimiter }()
+
 	sourceFile, err := os.Open(sourcePath)
 	if err != nil {
 		return "", err
@@ -83,7 +89,11 @@ func (a *App) ensureImageVariant(kind, relPath string) (string, error) {
 	}
 
 	dst := image.NewRGBA(image.Rect(0, 0, targetWidth, targetHeight))
-	draw.CatmullRom.Scale(dst, dst.Bounds(), sourceImage, bounds, draw.Over, nil)
+	var sampler draw.Interpolator = draw.CatmullRom
+	if kind == "thumb" {
+		sampler = draw.ApproxBiLinear
+	}
+	sampler.Scale(dst, dst.Bounds(), sourceImage, bounds, draw.Over, nil)
 
 	tempPath := variantPath + "." + strconv.FormatInt(time.Now().UnixNano(), 10) + ".tmp"
 	outputFile, err := os.Create(tempPath)

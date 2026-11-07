@@ -164,8 +164,7 @@ func (a *App) saveCustomRoots(roots []CustomRoot) error {
 		Version: customRootsVersion,
 		Roots:   normalizeCustomRoots(roots, true),
 	}
-	data, _ := json.MarshalIndent(store, "", "  ")
-	return os.WriteFile(a.customRootsFile(), data, 0644)
+	return writeJSONFileAtomic(a.customRootsFile(), store)
 }
 
 func (a *App) GetCustomRoots() ([]CustomRoot, error) {

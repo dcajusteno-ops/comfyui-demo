@@ -54,44 +54,34 @@ func (a *App) countEmptyFolders() int {
 	return emptyDirs
 }
 
-func (a *App) countInvalidTagReferences() int {
+func (a *App) buildDirectoryHealthSummary() (DirectoryHealthSummary, error) {
 	imageTags, _ := a.loadImageTags()
-	validPaths := make(map[string]bool)
+	favoriteGroups, _ := a.loadFavoriteGroups()
+
+	totalImages := 0
+	validPaths := make(map[string]struct{}, 1024)
 	_ = a.walkManagedImages(func(path, relPath string, info fs.FileInfo) error {
-		validPaths[relPath] = true
+		totalImages++
+		validPaths[relPath] = struct{}{}
 		return nil
 	})
 
-	invalid := 0
+	invalidTagReferences := 0
 	for relPath := range imageTags {
-		if !validPaths[relPath] {
-			invalid++
+		if _, ok := validPaths[relPath]; !ok {
+			invalidTagReferences++
 		}
 	}
-	return invalid
-}
 
-func (a *App) countInvalidFavoriteReferences() int {
-	groups, _ := a.loadFavoriteGroups()
-	validPaths := make(map[string]bool)
-	_ = a.walkManagedImages(func(path, relPath string, info fs.FileInfo) error {
-		validPaths[relPath] = true
-		return nil
-	})
-
-	invalid := 0
-	for _, group := range groups {
+	invalidFavoriteReferences := 0
+	for _, group := range favoriteGroups {
 		for _, relPath := range group.Paths {
-			if !validPaths[normalizeRelPath(relPath)] {
-				invalid++
+			if _, ok := validPaths[normalizeRelPath(relPath)]; !ok {
+				invalidFavoriteReferences++
 			}
 		}
 	}
-	return invalid
-}
 
-func (a *App) buildDirectoryHealthSummary() (DirectoryHealthSummary, error) {
-	totalImages := getManagedImagesCount(a)
 	thumbFiles, _, thumbBytes, thumbErr := measureDirectoryUsage(a.thumbVariantsDir())
 	if thumbErr != nil && !os.IsNotExist(thumbErr) {
 		return DirectoryHealthSummary{}, thumbErr
@@ -104,8 +94,8 @@ func (a *App) buildDirectoryHealthSummary() (DirectoryHealthSummary, error) {
 	summary := DirectoryHealthSummary{
 		TotalImages:                   totalImages,
 		EmptyFolderCount:              a.countEmptyFolders(),
-		InvalidTagReferenceCount:      a.countInvalidTagReferences(),
-		InvalidFavoriteReferenceCount: a.countInvalidFavoriteReferences(),
+		InvalidTagReferenceCount:      invalidTagReferences,
+		InvalidFavoriteReferenceCount: invalidFavoriteReferences,
 		ThumbCacheCount:               thumbFiles,
 		ThumbCacheBytes:               thumbBytes,
 		PreviewCacheCount:             previewFiles,

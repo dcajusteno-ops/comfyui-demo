@@ -1,8 +1,8 @@
 # Windows 安装器说明
 
-当前版本：`v3.2.0`
+当前版本：`v3.3.0`
 
-更新时间：`2026-10-09`
+更新时间：`2026-11-07`
 
 ## 1. 安装器目标
 
@@ -70,7 +70,7 @@ Copy-Item .\desktop-source\build\bin\ComfyManager-amd64-installer.exe .\ComfyMan
 
 ## 6. 当前版本注意事项
 
-- `v3.2.0` 的安装包与根目录 `desktop-app.exe` 使用同一次构建结果，安装包内已包含大图查看器增强、3D 环绕预览模式与背景壁纸功能
+- `v3.3.0` 的安装包与根目录 `desktop-app.exe` 使用同一次构建结果，安装包内已包含可搜索下拉菜单、大图库性能优化，并移除了 3D 环绕视图
 - 安装包显示的版本来自 `build/windows/installer/project.nsi` 的 `INFO_PRODUCTVERSION` —— **改版本号必须改这里**，否则安装包属性里还是旧版本
 - 发布前必须确保根目录安装包是最新构建结果
 - 如果安装器构建失败，优先检查 `makensis` 是否可用
@@ -81,4 +81,4 @@ Copy-Item .\desktop-source\build\bin\ComfyManager-amd64-installer.exe .\ComfyMan
 - 根目录 `ComfyManager-amd64-installer.exe` 已由 `build\bin` 新产物覆盖
 - 根目录 `desktop-app.exe` 已由 `build\bin` 新产物覆盖
 - **把 `desktop-app.exe` 从安装包里解出来比对 sha256**（NSIS 默认压缩，直接搜字符串搜不到；可用 Bandizip CLI：`bz x -o:<dir> <installer.exe>`），确认与根目录一致
-- 软件内使用文档与 GitHub 文档同步描述大图查看器、3D 环绕与背景壁纸
+- 软件内使用文档与 GitHub 文档同步描述大图查看器、可搜索下拉菜单与背景壁纸

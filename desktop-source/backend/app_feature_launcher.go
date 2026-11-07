@@ -25,8 +25,7 @@ func (a *App) loadLauncherTools() ([]LauncherTool, error) {
 }
 
 func (a *App) saveLauncherTools(tools []LauncherTool) error {
-	data, _ := json.MarshalIndent(tools, "", "  ")
-	return os.WriteFile(a.launcherToolsFile(), data, 0644)
+	return writeJSONFileAtomic(a.launcherToolsFile(), tools)
 }
 
 func (a *App) GetLauncherTools() ([]LauncherTool, error) {

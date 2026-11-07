@@ -410,7 +410,7 @@ func (a *App) GetImageMetadata(relPath string) (ImageMetadata, error) {
 	a.ensureImageMetaCacheLoaded()
 	width, height := 0, 0
 	modTime := info.ModTime().UTC().Format(time.RFC3339Nano)
-	if cached, ok := a.snapshotImageMetaCache()[normalized]; ok && cached.ModTime == modTime && cached.Size == info.Size() {
+	if cached, ok := a.getImageMetaCacheEntry(normalized); ok && cached.ModTime == modTime && cached.Size == info.Size() {
 		width = cached.Width
 		height = cached.Height
 	}

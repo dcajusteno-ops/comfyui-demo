@@ -1,6 +1,5 @@
 ﻿<script setup>
-import { ref, computed, provide, onMounted, onUnmounted } from 'vue'
-import { nextTick } from 'vue'
+import { ref, computed, provide, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import AppSidebar from './components/AppSidebar.vue'
 import ImageGallery from './components/ImageGallery.vue'
 import Home from './components/Home.vue'
@@ -146,7 +145,7 @@ const {
     isPagedLoading,
     modeReason,
     removeImagesLocally,
-} = useImages(showToast, confirm)
+} = useImages(showToast, confirm, { manageWatchers: true })
 
 // Selection State (Global or App level)
 const isSelectionMode = ref(false)
@@ -297,11 +296,10 @@ const finalTotalImages = computed(() => totalVisibleImages.value)
 
 const compactLatestImages = computed(() =>
     [...(sourceImages.value || [])]
-        .sort((left, right) => new Date(right.modTime || 0) - new Date(left.modTime || 0))
+        .sort((left, right) => (Date.parse(right.modTime || '') || 0) - (Date.parse(left.modTime || '') || 0))
         .slice(0, 200)
 )
 
-import { watch } from 'vue'
 watch(activeRoot, (next, prev) => {
     if (next === prev) return
     activeSub.value = ''
@@ -515,13 +513,18 @@ const deleteSelected = async () => {
     }
 }
 
-const handleRefresh = async () => {
+const handleRefresh = async (options = {}) => {
+    const includeHealth = options?.includeHealth !== false
     await refreshCurrentGalleryView({ syncSourceImages: true })
-    await fetchWorkbenchAggregate()
-    await fetchTags()
-    await fetchImageTags()
-    await fetchImageNotes()
-    await fetchDirectoryHealthSummary()
+    await Promise.all([
+        fetchWorkbenchAggregate(),
+        fetchTags(),
+        fetchImageTags(),
+        fetchImageNotes(),
+    ])
+    if (includeHealth) {
+        await fetchDirectoryHealthSummary()
+    }
 }
 
 const handleDirectoryBindingChanged = async () => {
@@ -573,7 +576,7 @@ onMounted(async () => {
     fetchImageNotes()
     fetchDirectoryHealthSummary()
     unsubscribeImagesChanged = EventsOn('images:changed', async () => {
-        await handleRefresh()
+        await handleRefresh({ includeHealth: false })
     })
     unsubscribeShortcutTriggered = EventsOn('shortcut:triggered', async (actionId) => {
         await handleShortcutAction(actionId)

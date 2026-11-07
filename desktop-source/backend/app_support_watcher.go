@@ -78,6 +78,10 @@ func (a *App) stopImageWatcher() {
 	a.watchMu.Lock()
 	defer a.watchMu.Unlock()
 
+	if a.imageWatchRestart != nil {
+		a.imageWatchRestart.Stop()
+		a.imageWatchRestart = nil
+	}
 	if a.imageWatchDebounce != nil {
 		a.imageWatchDebounce.Stop()
 		a.imageWatchDebounce = nil
@@ -93,6 +97,8 @@ func (a *App) stopImageWatcher() {
 }
 
 func (a *App) scheduleImagesChangedEvent() {
+	a.invalidateImageCountCache()
+
 	a.watchMu.Lock()
 	defer a.watchMu.Unlock()
 
@@ -146,6 +152,18 @@ func shouldReactToWatchEvent(event fsnotify.Event) bool {
 	return event.Op&(fsnotify.Create|fsnotify.Write|fsnotify.Remove|fsnotify.Rename) != 0
 }
 
+func (a *App) scheduleImageWatcherRestart() {
+	a.watchMu.Lock()
+	defer a.watchMu.Unlock()
+
+	if a.imageWatchRestart != nil {
+		a.imageWatchRestart.Stop()
+	}
+	a.imageWatchRestart = time.AfterFunc(900*time.Millisecond, func() {
+		a.restartImageWatcher()
+	})
+}
+
 func (a *App) restartImageWatcher() {
 	a.stopImageWatcher()
 
@@ -184,14 +202,14 @@ func (a *App) restartImageWatcher() {
 
 				if event.Op&fsnotify.Create != 0 {
 					if info, err := os.Stat(event.Name); err == nil && info.IsDir() {
-						a.restartImageWatcher()
+						a.scheduleImageWatcherRestart()
 						a.scheduleImagesChangedEvent()
 						continue
 					}
 				}
 
 				if event.Op&(fsnotify.Remove|fsnotify.Rename) != 0 {
-					a.restartImageWatcher()
+					a.scheduleImageWatcherRestart()
 				}
 
 				if info, err := os.Stat(event.Name); err == nil && info.IsDir() {

@@ -163,7 +163,7 @@ const createManualPart = (text) => ({
 
 const parseManualTerms = (text) => {
   return String(text || '')
-    .split(/[,\n闁挎稑鐭夌槐?]/)
+    .split(/[,\n，、；;？?]/)
     .map((item) => item.trim())
     .filter(Boolean)
 }

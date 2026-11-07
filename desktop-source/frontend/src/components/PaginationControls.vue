@@ -96,16 +96,13 @@
 
     <div class="flex items-center gap-2">
       <span class="text-sm text-muted-foreground whitespace-nowrap">每页</span>
-      <select
-        :value="itemsPerPage"
-        class="rounded-md border bg-background px-2 py-1 text-sm"
-        @change="$emit('items-per-page-change', Number($event.target.value))"
-      >
-        <option :value="25">25</option>
-        <option :value="50">50</option>
-        <option :value="100">100</option>
-        <option :value="200">200</option>
-      </select>
+      <AppSelect
+        :model-value="itemsPerPage"
+        :options="pageSizeOptions"
+        max-height="10rem"
+        trigger-class="rounded-md border bg-background px-2 py-1 pr-1.5 text-sm"
+        @update:model-value="$emit('items-per-page-change', $event)"
+      />
       <span class="text-sm text-muted-foreground">项</span>
     </div>
   </div>
@@ -114,6 +111,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { Button } from '@/components/ui/button'
+import AppSelect from './AppSelect.vue'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -124,6 +122,13 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['page-change', 'items-per-page-change'])
+
+const pageSizeOptions = [
+  { value: 25, label: '25' },
+  { value: 50, label: '50' },
+  { value: 100, label: '100' },
+  { value: 200, label: '200' },
+]
 
 const totalPages = computed(() => Math.ceil(props.totalItems / props.itemsPerPage))
 const startIndex = computed(() => (props.currentPage - 1) * props.itemsPerPage)

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func (a *App) loadImageMetaCache() (ImageMetaCache, error) {
@@ -27,8 +28,50 @@ func (a *App) loadImageMetaCache() (ImageMetaCache, error) {
 }
 
 func (a *App) saveImageMetaCache(cache ImageMetaCache) error {
-	data, _ := json.MarshalIndent(cache, "", "  ")
-	return os.WriteFile(a.imageMetaCacheFile(), data, 0644)
+	data, err := json.Marshal(cache)
+	if err != nil {
+		return err
+	}
+
+	a.imageMetaSaveMu.Lock()
+	defer a.imageMetaSaveMu.Unlock()
+
+	path := a.imageMetaCacheFile()
+	tempPath := path + ".tmp"
+	if err := os.WriteFile(tempPath, data, 0644); err != nil {
+		_ = os.Remove(tempPath)
+		return err
+	}
+	if err := os.Rename(tempPath, path); err != nil {
+		_ = os.Remove(tempPath)
+		return err
+	}
+	return nil
+}
+
+func (a *App) scheduleImageMetaCacheSave() {
+	a.imageMetaSaveMu.Lock()
+	defer a.imageMetaSaveMu.Unlock()
+
+	if a.imageMetaSaveTimer != nil {
+		a.imageMetaSaveTimer.Stop()
+	}
+	a.imageMetaSaveTimer = time.AfterFunc(600*time.Millisecond, func() {
+		if err := a.flushImageMetaCacheSave(); err != nil {
+			log.Printf("failed to save image metadata cache: %v", err)
+		}
+	})
+}
+
+func (a *App) flushImageMetaCacheSave() error {
+	a.imageMetaSaveMu.Lock()
+	if a.imageMetaSaveTimer != nil {
+		a.imageMetaSaveTimer.Stop()
+		a.imageMetaSaveTimer = nil
+	}
+	a.imageMetaSaveMu.Unlock()
+
+	return a.saveImageMetaCache(a.snapshotImageMetaCache())
 }
 
 func measureDirectoryUsage(root string) (int, int, int64, error) {
@@ -119,9 +162,31 @@ func (a *App) snapshotImageMetaCache() ImageMetaCache {
 	return cache
 }
 
+func (a *App) getImageMetaCacheEntry(relPath string) (ImageMetaCacheEntry, bool) {
+	a.ensureImageMetaCacheLoaded()
+
+	a.imageMetaMu.RLock()
+	defer a.imageMetaMu.RUnlock()
+
+	entry, ok := a.imageMetaCache[relPath]
+	return entry, ok
+}
+
 func (a *App) replaceImageMetaCache(cache ImageMetaCache) {
 	a.imageMetaMu.Lock()
 	defer a.imageMetaMu.Unlock()
+
+	// 扫描生成的新条目可能尚未扫描元数据；若旧缓存同版本且已扫描，保留旧值，
+	// 避免后台预热结果被前台扫描覆盖、同一批文件被反复解析。
+	for key, entry := range cache {
+		existing, ok := a.imageMetaCache[key]
+		if !ok || !existing.MetadataScanned || entry.MetadataScanned {
+			continue
+		}
+		if existing.ModTime == entry.ModTime && existing.Size == entry.Size {
+			cache[key] = existing
+		}
+	}
 
 	a.imageMetaCache = cache
 	a.imageMetaLoaded = true

@@ -9,3 +9,11 @@ data/
 ComfyManager-*-installer.exe
 tools/
 提示词/
+desktop-source/build_err_go.txt
+desktop-source/build_out.txt
+desktop-source/frontend/build.log
+desktop-source/frontend/build_err.txt
+desktop-source/frontend/build_output.txt
+desktop-source/frontend/build_verbose.txt
+desktop-source/frontend/public/favicon.png.bak
+.playwright-mcp/

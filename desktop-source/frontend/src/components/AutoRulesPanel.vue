@@ -19,6 +19,7 @@ import {
   Workflow,
 } from 'lucide-vue-next'
 import AutoRulesDialog from './AutoRulesDialog.vue'
+import AppSelect from './AppSelect.vue'
 import * as App from '@/api'
 
 const conditionLabels = {
@@ -49,6 +50,12 @@ const saving = ref(false)
 const running = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref('all')
+const statusFilterOptions = [
+  { value: 'all', label: '全部规则' },
+  { value: 'enabled', label: '已启用' },
+  { value: 'disabled', label: '已停用' },
+  { value: 'failed', label: '最近失败' },
+]
 const dialogOpen = ref(false)
 const editingRule = ref(null)
 let disposeProgressListener = null
@@ -484,16 +491,13 @@ onBeforeUnmount(() => {
               />
             </div>
 
-            <div class="relative lg:w-[160px]">
-              <select
+            <div class="lg:w-[160px]">
+              <AppSelect
                 v-model="statusFilter"
-                class="h-11 w-full appearance-none rounded-2xl border border-border/80 bg-background px-4 pr-10 text-sm shadow-none outline-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
-              >
-                <option value="all">全部规则</option>
-                <option value="enabled">已启用</option>
-                <option value="disabled">已停用</option>
-                <option value="failed">最近失败</option>
-              </select>
+                :options="statusFilterOptions"
+                max-height="10rem"
+                trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none focus:border-ring focus:ring-1 focus:ring-ring/60"
+              />
             </div>
           </div>
 

@@ -270,8 +270,7 @@ func (a *App) loadAutoRulesStoreUnlocked() (AutoRulesStore, error) {
 
 func (a *App) saveAutoRulesStoreUnlocked(store AutoRulesStore) error {
 	normalized := normalizeAutoRulesStore(store)
-	data, _ := json.MarshalIndent(normalized, "", "  ")
-	return os.WriteFile(a.autoRulesFile(), data, 0644)
+	return writeJSONFileAtomic(a.autoRulesFile(), normalized)
 }
 
 func (a *App) GetAutoRules() (AutoRulesStore, error) {
@@ -633,17 +632,15 @@ func (a *App) remapManagedImageReferences(oldRelPath, newRelPath string) error {
 	}
 
 	a.ensureImageMetaCacheLoaded()
-	cache := a.snapshotImageMetaCache()
-	if entry, ok := cache[oldRelPath]; ok {
-		delete(cache, oldRelPath)
+	a.imageMetaMu.Lock()
+	if entry, ok := a.imageMetaCache[oldRelPath]; ok {
+		delete(a.imageMetaCache, oldRelPath)
 		entry.RelPath = newRelPath
 		entry.Name = filepath.Base(newRelPath)
-		cache[newRelPath] = entry
-		a.replaceImageMetaCache(cache)
-		if err := a.saveImageMetaCache(cache); err != nil {
-			return err
-		}
+		a.imageMetaCache[newRelPath] = entry
 	}
+	a.imageMetaMu.Unlock()
+	a.scheduleImageMetaCacheSave()
 
 	return nil
 }
@@ -704,8 +701,9 @@ func (a *App) updateImageMetaCacheEntry(relPath string, info fs.FileInfo, metada
 	}
 
 	a.ensureImageMetaCacheLoaded()
-	cache := a.snapshotImageMetaCache()
-	entry := cache[normalized]
+
+	a.imageMetaMu.Lock()
+	entry := a.imageMetaCache[normalized]
 	entry.Name = filepath.Base(normalized)
 	entry.RelPath = normalized
 	entry.ModTime = info.ModTime().UTC().Format(time.RFC3339Nano)
@@ -721,9 +719,11 @@ func (a *App) updateImageMetaCacheEntry(relPath string, info fs.FileInfo, metada
 	entry.Sampler = metadata.Sampler
 	entry.Loras = append([]string(nil), metadata.Loras...)
 	entry.SearchText = buildImageSearchText(entry.Name, normalized, metadata.Width, metadata.Height, metadata)
-	cache[normalized] = entry
-	a.replaceImageMetaCache(cache)
-	return a.saveImageMetaCache(cache)
+	a.imageMetaCache[normalized] = entry
+	a.imageMetaMu.Unlock()
+
+	a.scheduleImageMetaCacheSave()
+	return nil
 }
 
 func (a *App) buildAutoRuleMatchContext(relPath string) (autoRuleMatchContext, error) {

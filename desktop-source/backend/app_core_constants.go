@@ -1,6 +1,6 @@
 package backend
 
-const customPromptSource = "闁煎浜滈悾鐐▕婢跺绲圭紒鈧ウ璺ㄦГ"
+const customPromptSource = "我的词库"
 
 const defaultFavoriteGroupID = "default"
 const defaultFavoriteGroupName = "Default Favorites"

@@ -184,8 +184,7 @@ func (a *App) loadImageTags() (ImageTagsMap, error) {
 }
 
 func (a *App) saveImageTags(imageTags ImageTagsMap) error {
-	data, _ := json.MarshalIndent(imageTags, "", "  ")
-	return os.WriteFile(a.imageTagsFile(), data, 0644)
+	return writeJSONFileAtomic(a.imageTagsFile(), imageTags)
 }
 
 func (a *App) loadImageNotes() (ImageNotesMap, error) {
@@ -224,8 +223,7 @@ func (a *App) loadImageNotes() (ImageNotesMap, error) {
 }
 
 func (a *App) saveImageNotes(notes ImageNotesMap) error {
-	data, _ := json.MarshalIndent(notes, "", "  ")
-	return os.WriteFile(a.imageNotesFile(), data, 0644)
+	return writeJSONFileAtomic(a.imageNotesFile(), notes)
 }
 
 func (a *App) GetImageNotes() (ImageNotesMap, error) {

@@ -22,23 +22,29 @@ const cardRef = ref(null)
 const tiltStyle = ref({ transform: 'none' })
 const glareStyle = ref({ opacity: 0, transform: 'translate(-50%, -50%)' })
 
-const handleMouseMove = (e) => {
-    if (!cardRef.value) return
-    
-    const rect = cardRef.value.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    
-    const centerX = rect.width / 2
-    const centerY = rect.height / 2
-    
+let cachedRect = null
+let rafId = 0
+let pendingPoint = null
+
+const handleMouseEnter = () => {
+    cachedRect = cardRef.value?.getBoundingClientRect() || null
+}
+
+const applyTilt = () => {
+    rafId = 0
+    if (!cachedRect || !pendingPoint) return
+
+    const { x, y } = pendingPoint
+    const centerX = cachedRect.width / 2
+    const centerY = cachedRect.height / 2
+
     const rotateX = ((y - centerY) / centerY) * -10
     const rotateY = ((x - centerX) / centerX) * 10
-    
+
     tiltStyle.value = {
         transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
     }
-    
+
     glareStyle.value = {
         opacity: 0.4,
         left: `${x}px`,
@@ -47,7 +53,28 @@ const handleMouseMove = (e) => {
     }
 }
 
+const handleMouseMove = (e) => {
+    if (!cachedRect) {
+        cachedRect = cardRef.value?.getBoundingClientRect() || null
+    }
+    if (!cachedRect) return
+
+    pendingPoint = {
+        x: e.clientX - cachedRect.left,
+        y: e.clientY - cachedRect.top,
+    }
+    if (!rafId) {
+        rafId = requestAnimationFrame(applyTilt)
+    }
+}
+
 const handleMouseLeave = () => {
+    if (rafId) {
+        cancelAnimationFrame(rafId)
+        rafId = 0
+    }
+    pendingPoint = null
+    cachedRect = null
     tiltStyle.value = { transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)' }
     glareStyle.value = { opacity: 0, transform: 'translate(-50%, -50%)' }
 }
@@ -60,6 +87,7 @@ const handleMouseLeave = () => {
       :class="{ 'ring-2 ring-primary bg-accent': selected }"
       :style="tiltStyle"
       @click="selectable ? $emit('toggle') : $emit('view')"
+      @mouseenter="handleMouseEnter"
       @mousemove="handleMouseMove"
       @mouseleave="handleMouseLeave"
     >
