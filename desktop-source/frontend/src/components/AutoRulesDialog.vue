@@ -180,7 +180,7 @@ const requestDelete = () => {
                 id="rule-name"
                 v-model="draft.name"
                 placeholder="例如：Pony 自动打标"
-                class="h-11 rounded-2xl shadow-none"
+                class="h-11 rounded-xl shadow-none"
               />
             </div>
 
@@ -191,20 +191,20 @@ const requestDelete = () => {
                 v-model="draft.matchMode"
                 :options="matchModeOptions"
                 max-height="10rem"
-                trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
+                trigger-class="h-11 w-full rounded-xl border border-control-border bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
               />
             </div>
 
-            <div class="flex items-end justify-between rounded-[22px] border border-border bg-muted/20 px-4 py-3">
+            <div class="flex items-end justify-between rounded-xl border border-border bg-muted/20 px-4 py-3">
               <div class="space-y-1">
                 <p class="text-sm font-medium text-foreground">启用规则</p>
                 <p class="text-xs text-muted-foreground">关闭后保留配置，但不会自动参与执行</p>
               </div>
-              <Switch :model-value="draft.enabled" @update:model-value="draft.enabled = $event" />
+              <Switch :model-value="draft.enabled" aria-label="启用该规则" @update:model-value="draft.enabled = $event" />
             </div>
           </div>
 
-          <section class="grid gap-3 rounded-[24px] border border-border bg-card p-4">
+          <section class="grid gap-3 rounded-2xl border border-border bg-card p-4">
             <div class="flex items-center justify-between gap-4">
               <div>
                 <h3 class="text-sm font-medium text-foreground">条件</h3>
@@ -220,26 +220,26 @@ const requestDelete = () => {
               <div
                 v-for="(condition, index) in draft.conditions"
                 :key="`condition-${index}`"
-                class="grid gap-3 rounded-[20px] border border-border/80 bg-background p-3 md:grid-cols-[150px_150px_minmax(0,1fr)_44px]"
+                class="grid gap-3 rounded-xl border border-border/80 bg-background p-3 md:grid-cols-[150px_150px_minmax(0,1fr)_44px]"
               >
                 <AppSelect
                   v-model="condition.field"
                   :options="fieldOptions"
                   max-height="12rem"
-                  trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
+                  trigger-class="h-11 w-full rounded-xl border border-control-border bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
                 />
 
                 <AppSelect
                   v-model="condition.operator"
                   :options="operatorOptions"
                   max-height="12rem"
-                  trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
+                  trigger-class="h-11 w-full rounded-xl border border-control-border bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
                 />
 
                 <Input
                   v-model="condition.value"
                   placeholder="请输入条件值"
-                  class="h-11 rounded-2xl shadow-none"
+                  class="h-11 rounded-xl shadow-none"
                 />
 
                 <Button
@@ -255,7 +255,7 @@ const requestDelete = () => {
             </div>
           </section>
 
-          <section class="grid gap-3 rounded-[24px] border border-border bg-card p-4">
+          <section class="grid gap-3 rounded-2xl border border-border bg-card p-4">
             <div class="flex items-center justify-between gap-4">
               <div>
                 <h3 class="text-sm font-medium text-foreground">动作</h3>
@@ -271,19 +271,19 @@ const requestDelete = () => {
               <div
                 v-for="(action, index) in draft.actions"
                 :key="`action-${index}`"
-                class="grid gap-3 rounded-[20px] border border-border/80 bg-background p-3 md:grid-cols-[180px_minmax(0,1fr)_44px]"
+                class="grid gap-3 rounded-xl border border-border/80 bg-background p-3 md:grid-cols-[180px_minmax(0,1fr)_44px]"
               >
                 <AppSelect
                   v-model="action.type"
                   :options="actionOptions"
                   max-height="12rem"
-                  trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
+                  trigger-class="h-11 w-full rounded-xl border border-control-border bg-background px-4 pr-3 text-sm shadow-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60"
                 />
 
                 <Input
                   v-model="action.value"
                   :placeholder="actionPlaceholderMap.get(action.type) || '请输入动作目标'"
-                  class="h-11 rounded-2xl shadow-none"
+                  class="h-11 rounded-xl shadow-none"
                 />
 
                 <Button

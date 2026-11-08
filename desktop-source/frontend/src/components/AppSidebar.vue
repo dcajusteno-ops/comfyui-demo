@@ -443,6 +443,7 @@ const handleDrawerClick = (subId) => {
           size="icon"
           class="h-8 w-8 shrink-0 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
           title="收起侧边栏"
+          aria-label="收起侧边栏"
           @click="$emit('toggle-collapse')"
         >
           <PanelLeftClose class="h-4 w-4" />
@@ -454,6 +455,7 @@ const handleDrawerClick = (subId) => {
           size="icon"
           class="h-9 w-9 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
           title="展开侧边栏"
+          aria-label="展开侧边栏"
           @click="$emit('toggle-collapse')"
         >
           <PanelLeftOpen class="h-5 w-5" />
@@ -510,12 +512,12 @@ const handleDrawerClick = (subId) => {
                     <span v-if="!collapsed" class="truncate">{{ root.displayName || root.name }}</span>
                     <span
                       v-if="!collapsed && root.pinned"
-                      class="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] leading-none text-primary"
+                      class="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[11px] leading-none text-primary"
                     >
                       顶
                     </span>
                   </div>
-                  <span v-if="!collapsed && (root.children && root.children.length > 0 || getRecursiveCount(root) > 0)" class="text-xs font-normal opacity-60">
+                  <span v-if="!collapsed && (root.children && root.children.length > 0 || getRecursiveCount(root) > 0)" class="text-xs font-normal opacity-75">
                     {{ getRecursiveCount(root) }}
                   </span>
                 </button>
@@ -530,7 +532,7 @@ const handleDrawerClick = (subId) => {
                         :class="activeSub === l1.id ? 'bg-secondary/80 text-primary font-medium' : 'text-foreground/80'"
                       >
                         <span class="truncate">{{ l1.displayName || l1.name }}</span>
-                        <span class="text-xs opacity-50">{{ getRecursiveCount(l1) }}</span>
+                        <span class="text-xs opacity-70">{{ getRecursiveCount(l1) }}</span>
                       </button>
 
                       <!-- Level 2 -->
@@ -542,7 +544,7 @@ const handleDrawerClick = (subId) => {
                                 :class="activeSub === l2.id ? 'bg-secondary/80 text-primary' : 'text-muted-foreground'"
                             >
                                 <span class="truncate">{{ l2.displayName || formatFolderName(l2.name) }}</span>
-                                <span class="text-xs opacity-50 font-normal">{{ getRecursiveCount(l2) }}</span>
+                                <span class="text-xs opacity-70 font-normal">{{ getRecursiveCount(l2) }}</span>
                             </button>
 
                             <!-- Level 3 -->
@@ -597,7 +599,7 @@ const handleDrawerClick = (subId) => {
              <!-- Tags List by Category (Expanded) -->
              <div v-if="!collapsed && tags.length > 0" class="mt-2 max-h-[28vh] space-y-3 overflow-y-auto pr-1 custom-scrollbar">
                  <div v-for="category in categoryNames" :key="category" class="space-y-1">
-                     <div class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
+                     <div class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
                          {{ category }}
                      </div>
                      <div class="grid grid-cols-1 gap-0.5">
@@ -606,13 +608,13 @@ const handleDrawerClick = (subId) => {
                             :key="tag.id"
                             @click="$emit('toggle-tag-filter', tag.id)"
                             class="flex items-center justify-between px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-secondary/50 text-left border border-transparent"
-                            :class="activeTagFilter === tag.id ? 'bg-secondary/80 text-primary border-primary/20 bg-primary/10' : 'text-foreground/80'"
+                            :class="activeTagFilter === tag.id ? 'bg-primary/10 text-primary border-primary/20' : 'text-foreground/80'"
                          >
                             <div class="flex items-center gap-2 overflow-hidden">
                                 <div class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: tag.color || '#ccc' }"></div>
                                 <span class="truncate">{{ tag.name }}</span>
                             </div>
-                            <span class="text-[10px] opacity-60 ml-2 font-normal">{{ getTagCount(tag.id) }}</span>
+                            <span class="text-[11px] opacity-75 ml-2 font-normal">{{ getTagCount(tag.id) }}</span>
                          </button>
                      </div>
                  </div>
@@ -629,7 +631,7 @@ const handleDrawerClick = (subId) => {
                      <PopoverContent side="right" align="start" :side-offset="12" class="w-56 p-2 max-h-[60vh] overflow-y-auto">
                         <div class="text-xs font-semibold mb-2 px-2 text-foreground/80">标签筛选</div>
                         <div v-for="category in categoryNames" :key="category" class="space-y-1 mt-2 first:mt-0">
-                            <div class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
+                            <div class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
                                 {{ category }}
                             </div>
                             <div class="grid grid-cols-1 gap-0.5">
@@ -638,13 +640,13 @@ const handleDrawerClick = (subId) => {
                                    :key="tag.id"
                                    @click="$emit('toggle-tag-filter', tag.id)"
                                    class="flex items-center justify-between px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-secondary/50 text-left border border-transparent"
-                                   :class="activeTagFilter === tag.id ? 'bg-secondary/80 text-primary border-primary/20 bg-primary/10' : 'text-foreground/80'"
+                                   :class="activeTagFilter === tag.id ? 'bg-primary/10 text-primary border-primary/20' : 'text-foreground/80'"
                                 >
                                    <div class="flex items-center gap-2 overflow-hidden">
                                        <div class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: tag.color || '#ccc' }"></div>
                                        <span class="truncate">{{ tag.name }}</span>
                                    </div>
-                                   <span class="text-[10px] opacity-60 ml-2 font-normal">{{ getTagCount(tag.id) }}</span>
+                                   <span class="text-[11px] opacity-75 ml-2 font-normal">{{ getTagCount(tag.id) }}</span>
                                 </button>
                             </div>
                         </div>
@@ -718,7 +720,7 @@ const handleDrawerClick = (subId) => {
                      :is="item.icon"
                      class="h-4 w-4 text-muted-foreground"
                      :class="{
-                       'text-amber-500': item.id === 'prompt-templates',
+                       'text-amber-600': item.id === 'prompt-templates',
                        'text-primary': item.id === 'always-on-top' && alwaysOnTop,
                      }"
                    />
@@ -794,7 +796,7 @@ const handleDrawerClick = (subId) => {
                         )"
                       >
                         <span>{{ l1.name }}</span>
-                        <span class="text-xs opacity-50">{{ getRecursiveCount(l1) }}</span>
+                        <span class="text-xs opacity-70">{{ getRecursiveCount(l1) }}</span>
                      </button>
 
                      <!-- Level 2 -->
@@ -808,7 +810,7 @@ const handleDrawerClick = (subId) => {
                                 )"
                              >
                                 <span>{{ l2.displayName || formatFolderName(l2.name) }}</span>
-                                <span class="text-xs opacity-50 font-normal">{{ getRecursiveCount(l2) }}</span>
+                                <span class="text-xs opacity-70 font-normal">{{ getRecursiveCount(l2) }}</span>
                              </button>
 
                              <!-- Level 3 -->

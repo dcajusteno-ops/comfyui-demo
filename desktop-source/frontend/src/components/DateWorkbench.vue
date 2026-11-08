@@ -76,7 +76,7 @@ const handleQuickDate = (date) => {
 <template>
   <div class="h-full overflow-y-auto bg-background">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-6">
-      <section class="rounded-3xl border border-border/70 bg-card/70 p-6 shadow-sm">
+      <section class="rounded-2xl border border-border/70 bg-card/70 p-6 shadow-sm">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div class="space-y-2">
             <p class="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">日期工作台</p>
@@ -104,7 +104,7 @@ const handleQuickDate = (date) => {
           v-for="card in summaryCards"
           :key="card.key"
           type="button"
-          class="rounded-3xl border border-border/70 bg-card px-5 py-5 text-left transition hover:border-primary/40 hover:bg-accent/30"
+          class="rounded-2xl border border-border/70 bg-card px-5 py-5 text-left transition hover:border-primary/40 hover:bg-accent/30"
           @click="emit('update:date-preset', card.preset)"
         >
           <div class="flex items-center justify-between">
@@ -116,7 +116,7 @@ const handleQuickDate = (date) => {
       </section>
 
       <section class="grid gap-6 xl:grid-cols-[1.3fr_0.9fr]">
-        <div class="rounded-3xl border border-border/70 bg-card p-6 shadow-sm">
+        <div class="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
           <div class="flex items-center justify-between gap-4">
             <div>
               <h2 class="text-lg font-semibold tracking-tight">快捷筛选</h2>
@@ -142,6 +142,7 @@ const handleQuickDate = (date) => {
                   v-for="preset in presetOptions"
                   :key="preset.value"
                   type="button"
+                  :aria-pressed="activeDatePreset === preset.value"
                   class="rounded-full border px-4 py-2 text-sm transition"
                   :class="activeDatePreset === preset.value ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-background text-muted-foreground hover:text-foreground'"
                   @click="emit('update:date-preset', preset.value)"
@@ -179,7 +180,7 @@ const handleQuickDate = (date) => {
                   placeholder="全部模型"
                   searchable
                   search-placeholder="搜索模型..."
-                  trigger-class="h-11 w-full rounded-2xl border border-border bg-background px-4 pr-3 text-sm focus:border-primary"
+                  trigger-class="h-11 w-full rounded-xl border border-control-border bg-background px-4 pr-3 text-sm focus:border-primary"
                   @update:model-value="emit('update:model-filter', $event)"
                 />
               </div>
@@ -191,7 +192,7 @@ const handleQuickDate = (date) => {
                   placeholder="全部 LoRA"
                   searchable
                   search-placeholder="搜索 LoRA..."
-                  trigger-class="h-11 w-full rounded-2xl border border-border bg-background px-4 pr-3 text-sm focus:border-primary"
+                  trigger-class="h-11 w-full rounded-xl border border-control-border bg-background px-4 pr-3 text-sm focus:border-primary"
                   @update:model-value="emit('update:lora-filter', $event)"
                 />
               </div>
@@ -199,7 +200,7 @@ const handleQuickDate = (date) => {
           </div>
         </div>
 
-        <div class="rounded-3xl border border-border/70 bg-card p-6 shadow-sm">
+        <div class="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
           <div class="flex items-center justify-between gap-4">
             <div>
               <h2 class="text-lg font-semibold tracking-tight">最近活跃日期</h2>

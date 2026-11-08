@@ -158,7 +158,7 @@ const promptDebugSourceLabel = (candidate) => {
 
 <template>
   <div
-    class="absolute bottom-10 top-[90px] right-8 z-[60] flex w-[360px] flex-col overflow-hidden rounded-xl border border-white/10 bg-black/70 text-white shadow-2xl backdrop-blur-xl"
+    class="selectable-text absolute bottom-10 top-[90px] right-8 z-[60] flex w-[360px] flex-col overflow-hidden rounded-xl border border-white/10 bg-black/70 text-white shadow-2xl backdrop-blur-xl"
     @click.stop
     @wheel.stop
   >
@@ -168,7 +168,7 @@ const promptDebugSourceLabel = (candidate) => {
       </div>
       <div class="min-w-0">
         <div class="text-sm font-semibold tracking-wide">PNG 元数据</div>
-        <div class="text-[11px] text-white/50">
+        <div class="text-[11px] text-white/75">
           {{ metadata?.hasMetadata ? '可查看并复制 prompt / workflow' : '按需读取当前图片信息' }}
         </div>
       </div>
@@ -182,27 +182,28 @@ const promptDebugSourceLabel = (candidate) => {
             @click="noteExpanded = !noteExpanded"
           >
             <div class="flex items-center gap-2">
-              <StickyNote class="h-3.5 w-3.5" :class="hasNote ? 'text-amber-300' : 'text-white/45'" />
-              <span class="text-[11px] font-semibold uppercase tracking-wider" :class="hasNote ? 'text-amber-300' : 'text-white/45'">笔记</span>
+              <StickyNote class="h-3.5 w-3.5" :class="hasNote ? 'text-amber-300' : 'text-white/75'" />
+              <span class="text-[11px] font-semibold uppercase tracking-wider" :class="hasNote ? 'text-amber-300' : 'text-white/75'">笔记</span>
             </div>
-            <ChevronUp v-if="noteExpanded" class="h-3.5 w-3.5 text-white/45" />
-            <ChevronDown v-else class="h-3.5 w-3.5 text-white/45" />
+            <ChevronUp v-if="noteExpanded" class="h-3.5 w-3.5 text-white/75" />
+            <ChevronDown v-else class="h-3.5 w-3.5 text-white/75" />
           </button>
           <div v-if="noteExpanded" class="px-3 pb-3">
             <textarea
               v-model="noteText"
-              class="w-full resize-none rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
+              class="w-full resize-none rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 placeholder:text-white/60 focus:outline-none focus:ring-1 focus:ring-white/20"
               rows="3"
+              aria-label="图片笔记"
               placeholder="添加笔记... (Ctrl+S / Ctrl+Enter 保存)"
               @blur="handleNoteBlur"
               @keydown="handleNoteKeydown"
             />
-            <div v-if="noteSaving" class="mt-1 text-[10px] text-white/40">保存中...</div>
-            <div v-else-if="hasNote" class="mt-1 text-[10px] text-white/40">已保存</div>
+            <div v-if="noteSaving" class="mt-1 text-[11px] text-white/70">保存中...</div>
+            <div v-else-if="hasNote" class="mt-1 text-[11px] text-white/70">已保存</div>
           </div>
         </div>
 
-        <div v-if="metadataLoading" class="flex items-center gap-2 text-sm text-white/70">
+        <div v-if="metadataLoading" class="flex items-center gap-2 text-sm text-white/85">
           <Loader2 class="h-4 w-4 animate-spin" />
           <span>正在读取图片元数据...</span>
         </div>
@@ -218,13 +219,13 @@ const promptDebugSourceLabel = (candidate) => {
               :key="fact.label"
               class="rounded-lg border border-white/10 bg-white/5 px-3 py-2"
             >
-              <div class="text-[11px] uppercase tracking-wider text-white/45">{{ fact.label }}</div>
+              <div class="text-[11px] uppercase tracking-wider text-white/75">{{ fact.label }}</div>
               <div class="mt-1 truncate text-sm text-white/90" :title="fact.value">{{ fact.value }}</div>
             </div>
           </div>
 
           <div v-if="metadata?.loras?.length" class="space-y-2">
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-white/45">LoRA</div>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-white/75">LoRA</div>
             <div class="flex flex-wrap gap-2">
               <Badge
                 v-for="lora in metadata.loras"
@@ -240,7 +241,7 @@ const promptDebugSourceLabel = (candidate) => {
           <div v-if="metadata?.hasMetadata || extraMetadataEntries.length > 0" class="space-y-4 rounded-lg border border-white/10 bg-white/5 p-3">
             <div v-if="metadata?.positive" class="space-y-2">
               <div class="flex items-center justify-between gap-3">
-                <div class="text-[11px] font-semibold uppercase tracking-wider text-white/45">正向 Prompt</div>
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-white/75">正向 Prompt</div>
                 <div class="flex items-center gap-1">
                   <Button
                     variant="ghost"
@@ -272,7 +273,7 @@ const promptDebugSourceLabel = (candidate) => {
 
             <div v-if="metadata?.negative" class="space-y-2">
               <div class="flex items-center justify-between gap-3">
-                <div class="text-[11px] font-semibold uppercase tracking-wider text-white/45">反向 Prompt</div>
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-white/75">反向 Prompt</div>
                 <div class="flex items-center gap-1">
                   <Button
                     variant="ghost"
@@ -304,7 +305,7 @@ const promptDebugSourceLabel = (candidate) => {
 
             <div v-if="metadata?.prompt" class="space-y-2">
               <div class="flex items-center justify-between gap-3">
-                <div class="text-[11px] font-semibold uppercase tracking-wider text-white/45">ComfyUI 提示词</div>
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-white/75">ComfyUI 提示词</div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -315,7 +316,7 @@ const promptDebugSourceLabel = (candidate) => {
                   复制 JSON
                 </Button>
               </div>
-              <div class="text-xs leading-5 text-white/60">
+              <div class="text-xs leading-5 text-white/80">
                 已检测到 ComfyUI prompt 节点图，可直接复制 JSON 用于恢复或分析。
               </div>
               <ScrollArea
@@ -330,7 +331,7 @@ const promptDebugSourceLabel = (candidate) => {
 
             <div v-if="metadata?.workflow" class="space-y-2">
               <div class="flex items-center justify-between gap-3">
-                <div class="text-[11px] font-semibold uppercase tracking-wider text-white/45">工作流</div>
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-white/75">工作流</div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -341,7 +342,7 @@ const promptDebugSourceLabel = (candidate) => {
                   复制 JSON
                 </Button>
               </div>
-              <div class="text-xs leading-5 text-white/60">
+              <div class="text-xs leading-5 text-white/80">
                 {{ metadata.nodeCount ? `已检测到 ${metadata.nodeCount} 个 workflow 节点，可直接复制回 ComfyUI。` : '已检测到 workflow JSON，可直接复制回 ComfyUI。' }}
               </div>
             </div>
@@ -353,11 +354,11 @@ const promptDebugSourceLabel = (candidate) => {
                 @click="promptDebugExpanded = !promptDebugExpanded"
               >
                 <div>
-                  <div class="text-[11px] font-semibold uppercase tracking-wider text-white/45">提示词解析调试</div>
-                  <div class="mt-1 text-xs leading-5 text-white/55">查看本次命中的节点来源、策略和候选排序。</div>
+                  <div class="text-[11px] font-semibold uppercase tracking-wider text-white/75">提示词解析调试</div>
+                  <div class="mt-1 text-xs leading-5 text-white/75">查看本次命中的节点来源、策略和候选排序。</div>
                 </div>
-                <ChevronUp v-if="promptDebugExpanded" class="h-4 w-4 text-white/45" />
-                <ChevronDown v-else class="h-4 w-4 text-white/45" />
+                <ChevronUp v-if="promptDebugExpanded" class="h-4 w-4 text-white/75" />
+                <ChevronDown v-else class="h-4 w-4 text-white/75" />
               </button>
 
               <div v-if="promptDebugExpanded" class="space-y-3">
@@ -368,20 +369,20 @@ const promptDebugSourceLabel = (candidate) => {
                 >
                   <div class="flex min-w-0 items-center justify-between gap-3">
                     <div class="min-w-0 text-xs font-semibold tracking-wide text-white/80">{{ section.label }}</div>
-                    <div class="text-[11px] text-white/45">{{ promptDebugStrategyLabel(section.data?.strategy) }}</div>
+                    <div class="text-[11px] text-white/75">{{ promptDebugStrategyLabel(section.data?.strategy) }}</div>
                   </div>
 
                   <div v-if="section.data?.selectedText" class="min-w-0 space-y-1 overflow-hidden rounded-md border border-emerald-400/20 bg-emerald-400/5 p-2">
                     <div class="text-[11px] uppercase tracking-wider text-emerald-100/70">当前命中</div>
                     <div class="whitespace-pre-wrap break-all text-xs leading-5 text-white/90">{{ section.data.selectedText }}</div>
-                    <div v-if="promptDebugSourceLabel(section.data)" class="whitespace-pre-wrap break-all text-[11px] leading-5 text-white/50">
+                    <div v-if="promptDebugSourceLabel(section.data)" class="whitespace-pre-wrap break-all text-[11px] leading-5 text-white/75">
                       来源：{{ promptDebugSourceLabel(section.data) }}
                       <span v-if="section.data?.sourceKey"> / {{ section.data.sourceKey }}</span>
                     </div>
                   </div>
 
                   <div v-if="section.data?.candidates?.length" class="space-y-2">
-                    <div class="text-[11px] uppercase tracking-wider text-white/45">候选排序</div>
+                    <div class="text-[11px] uppercase tracking-wider text-white/75">候选排序</div>
                     <div class="space-y-2">
                       <div
                         v-for="candidate in section.data.candidates.slice(0, 5)"
@@ -389,11 +390,11 @@ const promptDebugSourceLabel = (candidate) => {
                         class="min-w-0 overflow-hidden rounded-md border border-white/10 bg-black/20 p-2"
                       >
                         <div class="flex min-w-0 items-center justify-between gap-3">
-                          <div class="min-w-0 text-[11px] text-white/55">{{ promptDebugStrategyLabel(candidate.strategy) }}</div>
-                          <div class="text-[11px] text-white/40">分数 {{ candidate.score }}</div>
+                          <div class="min-w-0 text-[11px] text-white/75">{{ promptDebugStrategyLabel(candidate.strategy) }}</div>
+                          <div class="text-[11px] text-white/70">分数 {{ candidate.score }}</div>
                         </div>
                         <div class="mt-1 whitespace-pre-wrap break-all text-xs leading-5 text-white/85">{{ candidate.text }}</div>
-                        <div v-if="promptDebugSourceLabel(candidate)" class="mt-1 whitespace-pre-wrap break-all text-[11px] leading-5 text-white/45">
+                        <div v-if="promptDebugSourceLabel(candidate)" class="mt-1 whitespace-pre-wrap break-all text-[11px] leading-5 text-white/75">
                           来源：{{ promptDebugSourceLabel(candidate) }}
                           <span v-if="candidate.sourceKey"> / {{ candidate.sourceKey }}</span>
                         </div>
@@ -408,7 +409,7 @@ const promptDebugSourceLabel = (candidate) => {
               v-if="!metadata?.positive && !metadata?.negative && metadata?.extraFields?.parameters"
               class="space-y-2"
             >
-              <div class="text-[11px] font-semibold uppercase tracking-wider text-white/45">原始参数</div>
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-white/75">原始参数</div>
               <ScrollArea class="h-32 rounded-md border border-white/10 bg-black/20">
                 <div class="whitespace-pre-wrap break-words p-3 text-xs leading-5 text-white/80">
                   {{ metadata.extraFields.parameters }}
@@ -417,7 +418,7 @@ const promptDebugSourceLabel = (candidate) => {
             </div>
 
             <div v-if="extraMetadataEntries.length > 0" class="space-y-2">
-              <div class="text-[11px] font-semibold uppercase tracking-wider text-white/45">其他字段</div>
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-white/75">其他字段</div>
               <div class="space-y-2">
                 <div
                   v-for="[key, value] in extraMetadataEntries"
@@ -425,7 +426,7 @@ const promptDebugSourceLabel = (candidate) => {
                   class="rounded-lg border border-white/10 bg-black/20 px-3 py-2"
                 >
                   <div class="flex items-center justify-between gap-3">
-                    <div class="text-[11px] text-white/55">{{ key }}</div>
+                    <div class="text-[11px] text-white/75">{{ key }}</div>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -436,7 +437,7 @@ const promptDebugSourceLabel = (candidate) => {
                       复制
                     </Button>
                   </div>
-                  <div class="mt-2 max-h-16 overflow-hidden whitespace-pre-wrap break-words text-xs leading-5 text-white/70">
+                  <div class="mt-2 max-h-16 overflow-hidden whitespace-pre-wrap break-words text-xs leading-5 text-white/85">
                     {{ value }}
                   </div>
                 </div>
@@ -444,7 +445,7 @@ const promptDebugSourceLabel = (candidate) => {
             </div>
           </div>
 
-          <div v-else class="rounded-lg border border-white/10 bg-white/5 px-3 py-4 text-sm leading-6 text-white/60">
+          <div v-else class="rounded-lg border border-white/10 bg-white/5 px-3 py-4 text-sm leading-6 text-white/80">
             当前图片没有检测到可读取的 ComfyUI PNG 元数据。
           </div>
         </div>

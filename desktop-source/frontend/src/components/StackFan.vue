@@ -74,7 +74,7 @@ const cardStyle = (entry, position) => {
     @wheel.stop
   >
     <div class="mb-1.5 flex items-center justify-center gap-2">
-      <span class="text-[10px] font-semibold uppercase tracking-widest text-white/45">连拍组</span>
+      <span class="text-[11px] font-semibold uppercase tracking-widest text-white/75">连拍组</span>
       <span class="font-mono text-xs text-white/80">{{ currentIndex }} / {{ items.length }}</span>
     </div>
 

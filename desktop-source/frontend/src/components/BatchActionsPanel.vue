@@ -88,7 +88,7 @@
             </Button>
 
             <!-- A/B Compare -->
-            <Button v-if="count === 2" variant="outline" size="sm" @click="emit('compare')" class="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 hover:text-blue-600 border-blue-500/30">
+            <Button v-if="count === 2" variant="outline" size="sm" @click="emit('compare')" class="bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 hover:text-blue-700 dark:hover:text-blue-300 border-blue-500/30">
                 <ArrowLeftRight class="w-4 h-4 mr-2" />
                 A/B 对比
             </Button>

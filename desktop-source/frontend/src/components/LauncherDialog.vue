@@ -207,7 +207,7 @@ const useBuiltInIcon = (iconName) => {
               
               <ScrollArea class="flex-1">
                   <div class="p-2 space-y-2">
-                      <div v-if="tools.length === 0" class="flex flex-col items-center justify-center py-10 text-muted-foreground opacity-50">
+                      <div v-if="tools.length === 0" class="flex flex-col items-center justify-center py-10 text-muted-foreground opacity-80">
                           <TerminalSquare class="w-10 h-10 mb-2" />
                           <span class="text-sm">暂无工具</span>
                       </div>
@@ -251,7 +251,7 @@ const useBuiltInIcon = (iconName) => {
           <div v-if="showForm" class="w-[380px] min-h-0 border-l pl-4 flex flex-col overflow-hidden animate-in slide-in-from-right-5 fade-in duration-300">
               <div class="flex shrink-0 items-center justify-between mb-4">
                   <h3 class="font-semibold text-sm">{{ isEditing ? '编辑工具' : '添加新工具' }}</h3>
-                  <Button size="icon" variant="ghost" class="h-6 w-6" @click="showForm = false">
+                  <Button size="icon" variant="ghost" class="h-6 w-6" aria-label="关闭工具表单" @click="showForm = false">
                       <X class="w-4 h-4" />
                   </Button>
               </div>
@@ -259,23 +259,24 @@ const useBuiltInIcon = (iconName) => {
               <div class="space-y-3 flex-1 min-h-0 overflow-y-auto pr-1">
                   <div class="space-y-1">
                       <Label class="text-xs">名称</Label>
-                      <Input v-model="formData.name" placeholder="例如：模型合并器" class="h-8 select-text" />
+                      <Input v-model="formData.name" aria-label="工具名称" placeholder="例如：模型合并器" class="h-8 select-text" />
                   </div>
                   
                   <div class="space-y-1">
                       <Label class="text-xs">目标路径</Label>
                       <Input 
                         v-model="formData.path" 
+                        aria-label="工具目标路径"
                         placeholder="D:\工具\程序.exe 或 D:\工具\脚本.bat" 
                         class="h-8 font-mono text-xs select-text" 
                         @blur="handlePathBlur"
                       />
-                      <p class="text-[10px] text-muted-foreground">支持 .exe、.bat、.cmd、.html、.htm 等本地文件</p>
+                      <p class="text-[11px] text-muted-foreground">支持 .exe、.bat、.cmd、.html、.htm 等本地文件</p>
                   </div>
                   
                   <div class="space-y-1">
                       <Label class="text-xs">启动参数 (可选)</Label>
-                      <Input v-model="formData.args" placeholder="例如：--listen 0.0.0.0" class="h-8 font-mono text-xs select-text" />
+                      <Input v-model="formData.args" aria-label="启动参数" placeholder="例如：--listen 0.0.0.0" class="h-8 font-mono text-xs select-text" />
                   </div>
                   
                   <div class="space-y-2">
@@ -313,7 +314,7 @@ const useBuiltInIcon = (iconName) => {
                               <div class="text-xs font-medium">
                                 {{ hasImageIcon ? '当前使用程序图标' : (formData.icon || '当前使用默认图标') }}
                               </div>
-                              <div class="text-[10px] text-muted-foreground">
+                              <div class="text-[11px] text-muted-foreground">
                                 也可以在下方直接选择项目内置图标
                               </div>
                           </div>
@@ -325,7 +326,7 @@ const useBuiltInIcon = (iconName) => {
                           </div>
                           <div class="max-h-[150px] space-y-3 overflow-y-auto rounded-md border bg-background/70 p-3">
                             <div v-for="(icons, category) in categorizedIcons" :key="`launcher-${category}`" class="space-y-2">
-                              <div class="border-l-2 border-primary/30 pl-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                              <div class="border-l-2 border-primary/30 pl-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                                 {{ category }}
                               </div>
                               <div class="grid grid-cols-7 gap-1.5">

@@ -250,6 +250,7 @@ const isLastRoot = (root) => props.customRoots.findIndex((item) => item.id === r
                           <Switch
                             :model-value="root.enabled !== false"
                             :disabled="busyId === root.id"
+                            aria-label="侧边栏显示该图库"
                             @update:model-value="toggleEnabled(root, $event)"
                           />
                         </div>
@@ -320,13 +321,13 @@ const isLastRoot = (root) => props.customRoots.findIndex((item) => item.id === r
                   <div class="text-sm font-semibold">编辑目录</div>
                   <div class="text-xs text-muted-foreground">{{ editingRoot.path }}</div>
                 </div>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="resetEditState">
+                <Button variant="ghost" size="icon" class="h-8 w-8" aria-label="关闭编辑" @click="resetEditState">
                   <X class="h-4 w-4" />
                 </Button>
               </div>
 
               <div class="custom-root-edit-scroll min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
-                <Input v-model="editingName" placeholder="显示名称" @keydown.enter="handleUpdate" />
+                <Input v-model="editingName" aria-label="图库显示名称" placeholder="显示名称" @keydown.enter="handleUpdate" />
 
                 <div class="space-y-2">
                   <div class="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -334,7 +335,7 @@ const isLastRoot = (root) => props.customRoots.findIndex((item) => item.id === r
                   </div>
                   <div class="custom-root-icon-scroll max-h-[180px] space-y-3 overflow-y-auto rounded-xl border bg-background/70 p-3">
                     <div v-for="(icons, category) in categorizedIcons" :key="`edit-${category}`" class="space-y-2">
-                      <div class="border-l-2 border-primary/30 pl-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                      <div class="border-l-2 border-primary/30 pl-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                         {{ category }}
                       </div>
                       <div class="grid grid-cols-7 gap-1.5">
@@ -379,7 +380,7 @@ const isLastRoot = (root) => props.customRoots.findIndex((item) => item.id === r
                   {{ selectedPath || '点击选择文件夹' }}
                 </span>
               </div>
-              <Button variant="outline" size="icon" class="shrink-0" :disabled="isSelecting" @click="selectFolder">
+              <Button variant="outline" size="icon" class="shrink-0" aria-label="选择文件夹" :disabled="isSelecting" @click="selectFolder">
                 <Loader2 v-if="isSelecting" class="h-4 w-4 animate-spin" />
                 <FolderOpen v-else class="h-4 w-4" />
               </Button>
@@ -387,6 +388,7 @@ const isLastRoot = (root) => props.customRoots.findIndex((item) => item.id === r
 
             <Input
               v-model="newName"
+              aria-label="新图库显示名称"
               placeholder="显示名称（留空则使用文件夹名）"
               @keydown.enter="handleAdd"
             />
@@ -397,7 +399,7 @@ const isLastRoot = (root) => props.customRoots.findIndex((item) => item.id === r
               </div>
               <div class="custom-root-icon-scroll max-h-[220px] flex-1 space-y-3 overflow-y-auto rounded-xl border bg-background/70 p-3">
                 <div v-for="(icons, category) in categorizedIcons" :key="category" class="space-y-2">
-                  <div class="border-l-2 border-primary/30 pl-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                  <div class="border-l-2 border-primary/30 pl-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                     {{ category }}
                   </div>
                   <div class="grid grid-cols-7 gap-1.5">
@@ -408,6 +410,8 @@ const isLastRoot = (root) => props.customRoots.findIndex((item) => item.id === r
                       class="flex items-center justify-center rounded-md p-2 transition-all hover:scale-105"
                       :class="selectedIcon === iconName ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'"
                       :title="iconName"
+                      :aria-label="`选择图标 ${iconName}`"
+                      :aria-pressed="selectedIcon === iconName"
                       @click="selectedIcon = iconName"
                     >
                       <component :is="availableIcons[iconName]" class="h-4 w-4" />

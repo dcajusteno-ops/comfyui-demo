@@ -24,6 +24,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
+  --color-control-border: var(--control-border);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
@@ -71,13 +72,17 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* 0.52：保证 muted 小字在 bg-muted 上达到 5:1，而非 4.35:1 */
+  --muted-foreground: oklch(0.52 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* 表单控件专用边界：需与背景达到 3:1，装饰性边框仍用 --border */
+  --control-border: oklch(0.62 0 0);
+  --scrollbar-thumb: oklch(0.4 0 0 / 30%);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -100,12 +105,11 @@
   /* Reduced from 0.145 (darker) */
   --background: var(--background-base);
   --foreground: oklch(0.985 0 0);
-  --card-base: oklch(0.14 0 0);
-  /* Reduced from 0.205 */
+  /* 层级阶梯：背景 0.10 < 侧栏 0.13 < 卡片 0.16 < 弹层 0.18，用明度区分表面层级 */
+  --card-base: oklch(0.16 0 0);
   --card: var(--card-base);
   --card-foreground: oklch(0.985 0 0);
-  --popover-base: oklch(0.14 0 0);
-  /* Reduced from 0.205 */
+  --popover-base: oklch(0.18 0 0);
   --popover: var(--popover-base);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
@@ -120,18 +124,19 @@
   /* Reduced from 0.269 */
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 20%);
-  /* Increased from 10% */
+  --border: oklch(1 0 0 / 25%);
+  /* Increased from 10%，深色下表面明度提升后边框需同步加强 */
   --input: oklch(1 0 0 / 20%);
   /* Increased from 15% */
+  --control-border: oklch(1 0 0 / 35%);
+  --scrollbar-thumb: oklch(1 0 0 / 30%);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar-base: oklch(0.12 0 0);
-  /* Reduced from 0.205 */
+  --sidebar-base: oklch(0.13 0 0);
   --sidebar: var(--sidebar-base);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -174,6 +179,15 @@
 
   option:disabled {
     color: var(--muted-foreground);
+  }
+
+  /* 焦点兜底：未显式声明焦点样式的原生按钮 / 链接也能看到键盘焦点。
+     shadcn Button 自带 outline-none + ring，不会被这条规则覆盖。 */
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 
   #app,
@@ -224,7 +238,8 @@
   textarea,
   option,
   [contenteditable="true"],
-  .selectable-text {
+  .selectable-text,
+  .selectable-text * {
     cursor: url('/cursors/text.png'), text !important;
     user-select: text !important;
   }
@@ -371,5 +386,34 @@ html.has-wallpaper.wp-blur :is(
 /* Slim modern scrollbar */
 .custom-scrollbar::-webkit-scrollbar { width: 8px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.2); border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(150, 150, 150, 0.4); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: color-mix(in oklab, var(--scrollbar-thumb) 70%, var(--foreground) 30%); }
+
+/* 首页大图底部渐变：使用不透明基础色，避免壁纸开启后 --background 透明导致遮罩失效 */
+.hero-fade {
+  background-image: linear-gradient(
+    to top,
+    var(--background-base) 0%,
+    color-mix(in oklab, var(--background-base) 92%, transparent) 22%,
+    color-mix(in oklab, var(--background-base) 68%, transparent) 45%,
+    color-mix(in oklab, var(--background-base) 32%, transparent) 70%,
+    transparent 100%
+  );
+}
+
+/* 尊重系统「减少动态效果」设置：保留加载 spinner，其余动画 / 过渡降级 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-spin {
+    animation-duration: 1.2s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

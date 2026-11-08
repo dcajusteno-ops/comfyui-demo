@@ -119,6 +119,7 @@ watch(
     <button
       v-if="canGoPrev"
       class="absolute left-8 top-1/2 z-[70] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-all hover:scale-110 hover:bg-white/20"
+      aria-label="上一张"
       @click="$emit('prev')"
     >
       <ChevronLeft class="h-8 w-8" />
@@ -127,6 +128,7 @@ watch(
     <button
       v-if="canGoNext"
       class="absolute right-8 top-1/2 z-[70] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-all hover:scale-110 hover:bg-white/20"
+      aria-label="下一张"
       @click="$emit('next')"
     >
       <ChevronRight class="h-8 w-8" />

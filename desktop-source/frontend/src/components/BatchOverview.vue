@@ -23,7 +23,7 @@ const { mode, group } = useBatchGroups(
   >
     <div class="flex shrink-0 items-center gap-3 px-6 py-4">
       <span class="shrink-0 text-sm font-medium text-white/85">批次概览</span>
-      <span v-if="group" class="truncate font-mono text-xs text-white/45">
+      <span v-if="group" class="truncate font-mono text-xs text-white/70">
         {{ group.label }} · {{ group.items.length }} 张
       </span>
 
@@ -78,14 +78,14 @@ const { mode, group } = useBatchGroups(
             class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
           />
           <span
-            class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-black/70 px-1.5 py-1 text-[10px] text-white/80 opacity-0 transition-opacity group-hover:opacity-100"
+            class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-black/70 px-1.5 py-1 text-[11px] text-white/80 opacity-0 transition-opacity group-hover:opacity-100"
           >
             {{ entry.img.name }}
           </span>
         </button>
       </div>
 
-      <div v-else class="flex h-full items-center justify-center text-sm text-white/40">
+      <div v-else class="flex h-full items-center justify-center text-sm text-white/70">
         当前批次没有可展示的图片
       </div>
     </div>

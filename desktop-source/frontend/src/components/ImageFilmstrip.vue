@@ -49,13 +49,13 @@ onMounted(scrollActiveIntoView)
 <template>
   <div
     v-if="images.length > 1"
-    class="absolute bottom-0 left-0 right-0 z-[58] flex h-14 items-center gap-2 border-t border-white/10 bg-black/55 px-3 backdrop-blur-xl"
+    class="absolute bottom-0 left-0 right-0 z-[58] flex h-14 items-center gap-2 border-t border-white/10 bg-black/70 px-3 backdrop-blur-xl"
     @click.stop
     @wheel.stop
   >
     <button
       type="button"
-      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-25"
+      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/75 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-25"
       :disabled="currentIndex <= 0"
       title="上一张"
       @click="emit('jump', currentIndex - 1)"
@@ -88,7 +88,7 @@ onMounted(scrollActiveIntoView)
 
     <button
       type="button"
-      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-25"
+      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/75 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-25"
       :disabled="currentIndex >= images.length - 1"
       title="下一张"
       @click="emit('jump', currentIndex + 1)"
@@ -98,7 +98,7 @@ onMounted(scrollActiveIntoView)
 
     <button
       type="button"
-      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/75 transition-colors hover:bg-white/10 hover:text-white"
       title="批次概览（空格）"
       @click="emit('toggle-overview')"
     >

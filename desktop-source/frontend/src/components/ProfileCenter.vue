@@ -53,7 +53,7 @@ const defaultProfile = () => ({
   imagePath: '',
 })
 
-const profileControlClass = 'w-full rounded-2xl border border-border/80 bg-background px-4 py-3 text-sm text-foreground shadow-none outline-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60'
+const profileControlClass = 'w-full rounded-xl border border-control-border bg-background px-4 py-3 text-sm text-foreground shadow-none outline-none transition-[border-color,box-shadow] focus:border-ring focus:ring-1 focus:ring-ring/60'
 
 const loading = ref(true)
 const saving = ref(false)
@@ -252,11 +252,11 @@ onUnmounted(() => {
   <div class="h-full overflow-y-auto bg-background">
     <div class="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-6 px-6 py-8">
       <section class="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <Card class="rounded-[28px] border-border/70 bg-card shadow-none">
+        <Card class="rounded-2xl border-border/70 bg-card shadow-none">
           <CardContent class="grid gap-6 p-8 lg:grid-cols-[minmax(0,1fr)_280px]">
             <div class="min-w-0 space-y-5">
               <div class="flex items-start gap-5">
-                <div class="relative h-24 w-24 shrink-0 overflow-hidden rounded-[28px] border border-border bg-muted">
+                <div class="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-border bg-muted">
                   <img v-if="profile.imagePath" :src="profile.imagePath" alt="个人头像" class="h-full w-full object-cover" />
                   <div v-else class="flex h-full w-full items-center justify-center text-3xl font-semibold text-foreground">
                     {{ initials }}
@@ -295,7 +295,7 @@ onUnmounted(() => {
             </div>
 
             <div class="grid gap-4 self-start">
-              <div class="rounded-[24px] border border-border bg-background p-5">
+              <div class="rounded-2xl border border-border bg-background p-5">
                 <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">今日完成度</p>
                 <div class="mt-3 flex items-end gap-2">
                   <span class="text-4xl font-semibold tracking-tight text-foreground">
@@ -309,7 +309,7 @@ onUnmounted(() => {
                 <p class="mt-3 text-xs leading-5 text-muted-foreground">{{ completionLabel }}</p>
               </div>
 
-              <div class="rounded-[24px] border border-border bg-background p-5">
+              <div class="rounded-2xl border border-border bg-background p-5">
                 <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">资源概览</p>
                 <div class="mt-4 grid gap-3">
                   <div class="flex items-center justify-between">
@@ -330,13 +330,13 @@ onUnmounted(() => {
           </CardContent>
         </Card>
 
-        <Card class="rounded-[28px] border-border/70 bg-card shadow-none">
+        <Card class="rounded-2xl border-border/70 bg-card shadow-none">
           <CardHeader>
             <CardTitle class="text-lg">图片卡片</CardTitle>
             <CardDescription>只保留 1 张，上传新图会自动覆盖旧图。</CardDescription>
           </CardHeader>
           <CardContent class="grid gap-4">
-            <div class="overflow-hidden rounded-[24px] border border-border bg-background">
+            <div class="overflow-hidden rounded-2xl border border-border bg-background">
               <div v-if="profile.imagePath" class="aspect-[4/3] overflow-hidden bg-muted/30">
                 <img :src="profile.imagePath" alt="个人中心图片预览" class="h-full w-full object-cover" />
               </div>
@@ -363,7 +363,7 @@ onUnmounted(() => {
       </section>
 
       <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <article v-for="item in statCards" :key="item.key" class="rounded-[24px] border border-border bg-card p-5 shadow-none">
+        <article v-for="item in statCards" :key="item.key" class="rounded-2xl border border-border bg-card p-5 shadow-none">
           <div class="flex items-start justify-between gap-3">
             <div>
               <p class="text-[13px] text-muted-foreground">{{ item.title }}</p>
@@ -375,7 +375,7 @@ onUnmounted(() => {
       </div>
 
       <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Card class="rounded-[28px] border-border/70 bg-card shadow-none">
+        <Card class="rounded-2xl border-border/70 bg-card shadow-none">
           <CardHeader>
             <CardTitle class="text-lg">编辑资料</CardTitle>
             <CardDescription>把常用资料集中放在一个地方，保持页面轻一点、操作顺一点。</CardDescription>
@@ -384,17 +384,17 @@ onUnmounted(() => {
             <div class="grid gap-6 md:grid-cols-2">
               <div class="grid gap-2">
                 <Label for="profile-name">昵称</Label>
-                <Input id="profile-name" v-model="profile.displayName" maxlength="24" placeholder="例如：秋玖 / Studio Q" class="h-11 rounded-2xl border-border/80 bg-background shadow-none" />
+                <Input id="profile-name" v-model="profile.displayName" maxlength="24" placeholder="例如：秋玖 / Studio Q" class="h-11 rounded-xl border-control-border bg-background shadow-none" />
               </div>
               <div class="grid gap-2">
                 <Label for="profile-location">所在地</Label>
-                <Input id="profile-location" v-model="profile.location" maxlength="24" placeholder="例如：上海 / Remote" class="h-11 rounded-2xl border-border/80 bg-background shadow-none" />
+                <Input id="profile-location" v-model="profile.location" maxlength="24" placeholder="例如：上海 / Remote" class="h-11 rounded-xl border-control-border bg-background shadow-none" />
               </div>
             </div>
 
             <div class="grid gap-2">
               <Label for="profile-headline">一句话简介</Label>
-              <Input id="profile-headline" v-model="profile.headline" maxlength="60" placeholder="写一句你希望首页看到的话" class="h-11 rounded-2xl border-border/80 bg-background shadow-none" />
+              <Input id="profile-headline" v-model="profile.headline" maxlength="60" placeholder="写一句你希望首页看到的话" class="h-11 rounded-xl border-control-border bg-background shadow-none" />
             </div>
 
             <div class="grid gap-2">
@@ -413,7 +413,7 @@ onUnmounted(() => {
               <div class="grid gap-2">
                 <Label for="profile-website">主页 / 链接</Label>
                 <div class="flex gap-2">
-                  <Input id="profile-website" v-model="profile.website" maxlength="120" placeholder="https://example.com 或社媒主页" class="h-11 rounded-2xl border-border/80 bg-background shadow-none" />
+                  <Input id="profile-website" v-model="profile.website" maxlength="120" placeholder="https://example.com 或社媒主页" class="h-11 rounded-xl border-control-border bg-background shadow-none" />
                   <Button variant="outline" class="h-11 shrink-0 rounded-2xl shadow-none" :disabled="!profile.website.trim()" @click="copyWebsite">
                     <Copy class="mr-2 h-4 w-4" />
                     复制
@@ -454,19 +454,19 @@ onUnmounted(() => {
           <CardContent v-else class="grid gap-4">
             <div class="h-11 rounded-2xl bg-muted/60" />
             <div class="h-11 rounded-2xl bg-muted/60" />
-            <div class="h-32 rounded-[24px] bg-muted/60" />
+            <div class="h-32 rounded-2xl bg-muted/60" />
             <div class="h-11 rounded-2xl bg-muted/60" />
           </CardContent>
         </Card>
 
         <div class="grid gap-6 self-start">
-          <Card class="rounded-[28px] border-border/70 bg-card shadow-none">
+          <Card class="rounded-2xl border-border/70 bg-card shadow-none">
             <CardHeader>
               <CardTitle class="text-lg">外观与偏好</CardTitle>
               <CardDescription>保持简约，不做多余的渐变和装饰。</CardDescription>
             </CardHeader>
             <CardContent class="grid gap-4">
-              <button type="button" class="flex items-center justify-between rounded-[22px] border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/35" @click="handleThemeToggle($event)">
+              <button type="button" class="flex items-center justify-between rounded-xl border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/35" @click="handleThemeToggle($event)">
                 <div>
                   <div class="text-sm font-medium">界面主题</div>
                   <div class="mt-1 text-xs text-muted-foreground">当前为 {{ isDark ? '深色模式' : '浅色模式' }}，点击即可切换。</div>
@@ -474,7 +474,7 @@ onUnmounted(() => {
                 <component :is="isDark ? Moon : Sun" class="h-5 w-5 text-muted-foreground" />
               </button>
 
-              <button type="button" class="flex items-center justify-between rounded-[22px] border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/35" @click="emit('navigate', profile.preferredStartPage)">
+              <button type="button" class="flex items-center justify-between rounded-xl border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/35" @click="emit('navigate', profile.preferredStartPage)">
                 <div>
                   <div class="text-sm font-medium">快捷入口</div>
                   <div class="mt-1 text-xs text-muted-foreground">点击跳转到默认进入页：{{ preferredStartPageLabel }}</div>
@@ -484,27 +484,27 @@ onUnmounted(() => {
             </CardContent>
           </Card>
 
-          <Card class="rounded-[28px] border-border/70 bg-card shadow-none">
+          <Card class="rounded-2xl border-border/70 bg-card shadow-none">
             <CardHeader>
               <CardTitle class="text-lg">个人信息</CardTitle>
               <CardDescription>把身份信息和实际产出放在一起，查看时更直观。</CardDescription>
             </CardHeader>
             <CardContent class="grid gap-4 text-sm text-muted-foreground">
-              <div class="rounded-[22px] border border-border bg-background px-4 py-3">
+              <div class="rounded-xl border border-border bg-background px-4 py-3">
                 <div class="flex items-center gap-2 text-foreground">
                   <UserRound class="h-4 w-4" />
                   <span class="font-medium">显示名称</span>
                 </div>
                 <p class="mt-2 leading-6">{{ profile.displayName }}</p>
               </div>
-              <div class="rounded-[22px] border border-border bg-background px-4 py-3">
+              <div class="rounded-xl border border-border bg-background px-4 py-3">
                 <div class="flex items-center gap-2 text-foreground">
                   <MapPin class="h-4 w-4" />
                   <span class="font-medium">所在地</span>
                 </div>
                 <p class="mt-2 leading-6">{{ profile.location || '未设置所在地' }}</p>
               </div>
-              <div class="rounded-[22px] border border-border bg-background px-4 py-3">
+              <div class="rounded-xl border border-border bg-background px-4 py-3">
                 <div class="flex items-center gap-2 text-foreground">
                   <Heart class="h-4 w-4" />
                   <span class="font-medium">主页链接</span>

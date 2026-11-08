@@ -15,6 +15,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css' // Import sonner styles
 import { useImages } from './composables/useImages'
+import { isDark } from './theme'
 import { loadWallpaper } from './wallpaper'
 import * as App from '@/api'
 import { EventsOn } from '../wailsjs/runtime/runtime'
@@ -775,6 +776,6 @@ onUnmounted(() => {
     />
   </div>
 
-  <Toaster position="top-center" richColors />
+  <Toaster position="top-center" richColors :theme="isDark ? 'dark' : 'light'" />
 </template>
 

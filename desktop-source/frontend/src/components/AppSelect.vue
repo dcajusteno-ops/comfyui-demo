@@ -170,10 +170,12 @@ const handleKeydown = (event) => {
         type="button"
         :disabled="disabled"
         :title="title"
+        role="combobox"
+        aria-haspopup="listbox"
         :aria-expanded="open"
         :class="
           cn(
-            'flex items-center justify-between gap-2 text-left text-foreground outline-none transition disabled:cursor-not-allowed disabled:opacity-60',
+            'flex items-center justify-between gap-2 border-control-border text-left text-foreground outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60',
             triggerClass,
           )
         "
@@ -211,7 +213,7 @@ const handleKeydown = (event) => {
             v-model="query"
             type="text"
             :placeholder="searchPlaceholder"
-            class="h-8 w-full rounded-md border border-border/70 bg-background pl-8 pr-2 text-xs text-foreground outline-none transition focus:border-primary"
+            class="h-8 w-full rounded-md border border-control-border/70 bg-background pl-8 pr-2 text-xs text-foreground outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
             @keydown="handleKeydown"
           />
         </div>
@@ -239,7 +241,7 @@ const handleKeydown = (event) => {
           <span class="min-w-0 flex-1 truncate" :title="option.label">{{ option.label }}</span>
           <span
             v-if="option.count !== undefined"
-            class="shrink-0 text-[10px] tabular-nums text-muted-foreground"
+            class="shrink-0 text-[11px] tabular-nums text-muted-foreground"
           >
             {{ option.count }}
           </span>

@@ -1,39 +1,31 @@
 # Comfy Manager 发布说明
 
-当前版本：`v3.3.0`
+当前版本：`v3.3.1`
 
 远程仓库：
 
 - `origin`: `https://github.com/dcajusteno-ops/comfyui-demo.git`
 - 默认分支：`master`
 
-## 1. v3.3.0 发布重点
+## 1. v3.3.1 发布重点
 
-`v3.3.0` 是在 `v3.2.0` 基础上的体验与性能更新：移除图库 3D 环绕视图、重做全项目下拉菜单、完成大图库扫描与缓存优化，并补齐稳定性修复与后端单元测试。
+`v3.3.1` 是在 `v3.3.0` 基础上的 UI 可访问性与视觉一致性更新，不改变现有功能与数据格式。
 
 ### 本次核心变更
 
-- **图库只保留网格视图**
-  - 移除「网格 / 环绕」切换与 3D 环绕预览模式
-  - 删除 `OrbitGallery.vue`、`.wp-scrim` 样式与相关入口
-  - 缩略图尺寸、排序、连拍叠图、搜索与筛选保持不变
-- **下拉菜单全面重做**
-  - 新增 `AppSelect.vue`，替换项目中全部原生下拉框
-  - 模型 / LoRA / 标签下拉支持输入关键字搜索
-  - 固定宽度、深色 / 浅色主题自动适配，支持 ↑/↓、Enter、Esc 与空格操作
-  - 选项显示数量、当前项勾选、长文本省略与悬停查看全称
-- **大图库性能优化**
-  - 元数据缓存改为单条读写；缓存写盘改为紧凑 JSON + 原子替换 + 防抖合并
-  - 搜索 / 模型 / LoRA 筛选走轻量分页；图片总数计数缓存
-  - 健康检查合并遍历；出图刷新跳过健康检查并并行化
-  - 缩略图 4 并发限制；缩略图采样器改用双线性；目录监听重启防抖
-  - 列表稳定排序，消除相同时间戳的翻页抖动
-- **稳定性与修复**
-  - 修复「我的词库」来源乱码，自定义提示词条目恢复识别与删除入口
-  - 手动词条支持中文逗号 / 顿号 / 分号 / 问号拆分
-  - 所有 JSON 配置改为原子写盘
-  - 新增后端单元测试（排序 / 分页 / 目录范围 / 日期 / JSON 清洗 / 缓存写盘）
-- 版本号在本版统一：`project.nsi` / `package.json` / README / docs / 软件内使用文档全部对齐 `v3.3.0`
+- **可访问性**
+  - 全项目图标按钮、开关、滑杆、输入框补齐可访问名称与状态语义
+  - 统计图表 / 热力图 / 图片卡片补充 ARIA 语义，图片卡片改为真实按钮覆盖层
+  - 全局焦点环、控件边界达到 3:1；浅色次要文字达到 5:1
+- **对比度与主题**
+  - 修复深色 + 壁纸模式下提示气泡「浅底浅字」
+  - 首页「最近作品」改用多段柔和渐变遮罩，壁纸模式不再失效
+  - 深色主题重建背景 / 侧栏 / 卡片 / 弹层层级；Toast 与确认框跟随主题
+  - 图片 HUD、元数据面板、胶片条等悬浮层小字整体提亮
+- **视觉一致性**
+  - 圆角统一为卡片 `rounded-2xl`、控件 `rounded-xl`，清理任意圆角
+  - 字号下限统一 11px，滚动条主题化，小窗筛选两行布局
+- 版本号在本版统一：`project.nsi` / `package.json` / README / docs / 软件内使用文档全部对齐 `v3.3.1`
 
 ## 2. 标准发布流程
 
@@ -78,36 +70,37 @@ Copy-Item .\desktop-source\build\bin\ComfyManager-amd64-installer.exe .\ComfyMan
 
 ```powershell
 git add -A
-git commit -m "release: v3.3.0"
-git tag -a v3.3.0 -m "v3.3.0"
+git commit -m "release: v3.3.1"
+git tag -a v3.3.1 -m "v3.3.1"
 git push origin master
-git push origin v3.3.0
+git push origin v3.3.1
 ```
 
 ### 2.6 推送 GitHub Release
 
 ```powershell
-gh release create v3.3.0 .\desktop-app.exe .\ComfyManager-amd64-installer.exe `
-  --title "v3.3.0" --notes-file <发布说明>
+gh release create v3.3.1 .\desktop-app.exe .\ComfyManager-amd64-installer.exe `
+  --title "v3.3.1" --notes-file <发布说明>
 ```
 
-## 3. v3.3.0 验收清单
+## 3. v3.3.1 验收清单
 
-- 软件内使用文档版本显示为 `v3.3.0`
-- GitHub README 版本显示为 `v3.3.0`
-- 安装包属性中的版本为 `3.3.0`（来自 `project.nsi`）
+- 软件内使用文档版本显示为 `v3.3.1`
+- GitHub README 版本显示为 `v3.3.1`
+- 安装包属性中的版本为 `3.3.1`（来自 `project.nsi`）
 - 根目录 `desktop-app.exe` 已覆盖最新构建
 - 根目录 `ComfyManager-amd64-installer.exe` 已覆盖最新安装包
 - `wails build -clean` 成功
 - `wails build --nsis -clean` 成功
 - 根目录发布产物与 `desktop-source/build/bin/` 哈希一致
 - **从安装包中解出 `desktop-app.exe`，其哈希与根目录一致**（确认安装包内真的是新程序）
-- Git tag `v3.3.0` 已推送，GitHub Release 已附带两个产物
+- Git tag `v3.3.1` 已推送，GitHub Release 已附带两个产物
 
 ## 4. 历史版本
 
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v3.3.1 | 2026-11-08 | UI 可访问性与对比度打磨、固定壁纸模式可读性、统一圆角与字号、图片卡片交互结构修复 |
 | v3.3.0 | 2026-11-07 | 移除 3D 环绕视图、统一可搜索下拉菜单、大图库扫描与缓存优化、编码与写盘修复、新增后端单元测试 |
 | v3.2.0 | 2026-10-09 | 大图查看器增强（氛围画廊 / 缩略图导航条 / 批次概览层 / 参数 HUD / 层叠连拍组）、3D 环绕预览模式、背景壁纸自定义、图片与环绕视图缺陷修复 |
 | v3.1.5 | 2026-05-08 | 第三方词库导入放开、随包附赠 NAI4 标签库、安装器同步 |

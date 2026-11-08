@@ -28,6 +28,7 @@
         size="sm"
         :disabled="currentPage === 1"
         title="首页"
+        aria-label="首页"
         @click="$emit('page-change', 1)"
       >
         <ChevronsLeft class="h-4 w-4" />
@@ -38,6 +39,7 @@
         size="sm"
         :disabled="currentPage === 1"
         title="上一页"
+        aria-label="上一页"
         @click="$emit('page-change', currentPage - 1)"
       >
         <ChevronLeft class="h-4 w-4" />
@@ -65,6 +67,7 @@
           v-model="pageInput"
           type="text"
           inputmode="numeric"
+          aria-label="页码"
           class="h-7 w-12 rounded-full bg-background/80 px-2 text-center text-sm text-foreground outline-none ring-0"
           @keydown.enter.prevent="submitPageInput"
           @blur="submitPageInput"
@@ -78,6 +81,7 @@
         size="sm"
         :disabled="currentPage === totalPages"
         title="下一页"
+        aria-label="下一页"
         @click="$emit('page-change', currentPage + 1)"
       >
         <ChevronRight class="h-4 w-4" />
@@ -88,6 +92,7 @@
         size="sm"
         :disabled="currentPage === totalPages"
         title="末页"
+        aria-label="末页"
         @click="$emit('page-change', totalPages)"
       >
         <ChevronsRight class="h-4 w-4" />

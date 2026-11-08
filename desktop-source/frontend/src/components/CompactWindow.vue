@@ -828,15 +828,16 @@ const folderRowStyle = (row) => ({
           size="icon"
           class="h-8 w-8 rounded-md"
           :title="alwaysOnTop ? '取消置顶' : '置顶窗口'"
+          :aria-label="alwaysOnTop ? '取消置顶' : '置顶窗口'"
           @click="emit('toggle-always-on-top')"
         >
           <Pin v-if="alwaysOnTop" class="h-4 w-4 text-primary" />
           <PinOff v-else class="h-4 w-4 text-muted-foreground" />
         </Button>
-        <Button variant="ghost" size="icon" class="h-8 w-8 rounded-md" title="刷新" @click="emit('refresh')">
+        <Button variant="ghost" size="icon" class="h-8 w-8 rounded-md" title="刷新" aria-label="刷新" @click="emit('refresh')">
           <RefreshCw class="h-4 w-4 text-muted-foreground" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button variant="ghost" size="icon" class="h-8 w-8 rounded-md" title="恢复主窗口" @click="emit('restore')">
+        <Button variant="ghost" size="icon" class="h-8 w-8 rounded-md" title="恢复主窗口" aria-label="恢复主窗口" @click="emit('restore')">
           <Maximize2 class="h-4 w-4 text-muted-foreground" />
         </Button>
       </div>
@@ -844,7 +845,7 @@ const folderRowStyle = (row) => ({
 
     <main v-if="selectedImage" class="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div class="flex h-10 shrink-0 items-center gap-1 border-b px-3">
-        <Button variant="ghost" size="icon" class="h-8 w-8 rounded-md" title="返回列表" @click="closeDetail">
+        <Button variant="ghost" size="icon" class="h-8 w-8 rounded-md" title="返回列表" aria-label="返回列表" @click="closeDetail">
           <ArrowLeft class="h-4 w-4" />
         </Button>
         <div class="min-w-0 flex-1 truncate text-xs font-medium">{{ selectedImage.name }}</div>
@@ -853,6 +854,7 @@ const folderRowStyle = (row) => ({
           size="icon"
           class="h-8 w-8 rounded-md"
           title="上一张"
+          aria-label="上一张"
           :disabled="visibleImages.length < 2"
           @click="openAdjacent(-1)"
         >
@@ -863,6 +865,7 @@ const folderRowStyle = (row) => ({
           size="icon"
           class="h-8 w-8 rounded-md"
           title="下一张"
+          aria-label="下一张"
           :disabled="visibleImages.length < 2"
           @click="openAdjacent(1)"
         >
@@ -1052,7 +1055,7 @@ const folderRowStyle = (row) => ({
                 复制
               </Button>
             </div>
-            <div class="max-h-32 overflow-y-auto whitespace-pre-wrap break-words px-3 py-2 text-xs leading-5 text-muted-foreground">
+            <div class="selectable-text max-h-32 overflow-y-auto whitespace-pre-wrap break-words px-3 py-2 text-xs leading-5 text-muted-foreground">
               {{ metadata.positive }}
             </div>
           </div>
@@ -1068,7 +1071,7 @@ const folderRowStyle = (row) => ({
                 复制
               </Button>
             </div>
-            <div class="max-h-28 overflow-y-auto whitespace-pre-wrap break-words px-3 py-2 text-xs leading-5 text-muted-foreground">
+            <div class="selectable-text max-h-28 overflow-y-auto whitespace-pre-wrap break-words px-3 py-2 text-xs leading-5 text-muted-foreground">
               {{ metadata.negative }}
             </div>
           </div>
@@ -1108,7 +1111,7 @@ const folderRowStyle = (row) => ({
 
         <div class="relative min-w-0">
           <Search class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input v-model="query" class="h-8 pl-8 pr-3 text-xs" placeholder="搜索文件、模型、标签" />
+          <Input v-model="query" class="h-8 pl-8 pr-3 text-xs" aria-label="搜索文件、模型、标签" placeholder="搜索文件、模型、标签" />
         </div>
 
         <Button
@@ -1126,7 +1129,7 @@ const folderRowStyle = (row) => ({
       <div v-if="folderPanelOpen" class="shrink-0 overflow-hidden rounded-md border bg-card p-2">
         <div class="relative">
           <Search class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input v-model="folderSearch" class="h-8 pl-8 pr-3 text-xs" placeholder="搜索目录" />
+          <Input v-model="folderSearch" class="h-8 pl-8 pr-3 text-xs" aria-label="搜索目录" placeholder="搜索目录" />
         </div>
         <div class="mt-2 max-h-32 overflow-y-auto">
           <button
@@ -1174,7 +1177,7 @@ const folderRowStyle = (row) => ({
           </button>
         </div>
 
-        <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_92px_auto_auto] gap-1.5">
+        <div class="grid grid-cols-2 gap-1.5">
           <AppSelect
             v-model="dateFilter"
             :options="compactDateOptions"
@@ -1187,6 +1190,8 @@ const folderRowStyle = (row) => ({
             max-height="10rem"
             trigger-class="h-8 w-full min-w-0 rounded-md border bg-background px-2 pr-1 text-xs"
           />
+        </div>
+        <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-1.5">
           <AppSelect
             v-model="pageSize"
             :options="compactPageSizeOptions"
@@ -1194,10 +1199,10 @@ const folderRowStyle = (row) => ({
             trigger-class="h-8 w-full min-w-0 rounded-md border bg-background px-2 pr-1 text-xs"
             title="每页数量"
           />
-          <Button variant="outline" size="icon" class="h-8 w-8 rounded-md" title="Output" :disabled="actionBusy === 'open-output'" @click="openOutputFolder">
+          <Button variant="outline" size="icon" class="h-8 w-8 rounded-md" title="Output" aria-label="打开 Output 目录" :disabled="actionBusy === 'open-output'" @click="openOutputFolder">
             <FolderOpen class="h-3.5 w-3.5" />
           </Button>
-          <Button variant="outline" size="icon" class="h-8 w-8 rounded-md" title="清缓存" :disabled="actionBusy === 'clear-cache'" @click="clearPreviewCache">
+          <Button variant="outline" size="icon" class="h-8 w-8 rounded-md" title="清缓存" aria-label="清缓存" :disabled="actionBusy === 'clear-cache'" @click="clearPreviewCache">
             <Eraser class="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -1276,7 +1281,7 @@ const folderRowStyle = (row) => ({
             >
               <img v-if="getImageSrc(img)" :src="getImageSrc(img)" :alt="img.name" class="h-full w-full object-cover" />
               <ImageIcon v-else class="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />
-              <div class="absolute inset-x-0 bottom-0 bg-black/55 px-1.5 py-1 text-[10px] text-white opacity-90">
+              <div class="absolute inset-x-0 bottom-0 bg-black/55 px-1.5 py-1 text-[11px] text-white opacity-90">
                 <div class="truncate">{{ img.name }}</div>
               </div>
               <div class="absolute left-1.5 top-1.5 flex gap-1">
@@ -1312,7 +1317,7 @@ const folderRowStyle = (row) => ({
             <div class="min-w-0 self-center">
               <div class="flex min-w-0 items-center gap-1.5">
                 <div class="truncate text-xs font-medium">{{ img.name }}</div>
-                <StickyNote v-if="img.note" class="h-3 w-3 shrink-0 text-amber-500" />
+                <StickyNote v-if="img.note" class="h-3 w-3 shrink-0 text-amber-600" />
               </div>
               <div class="mt-1 truncate text-[11px] text-muted-foreground">
                 {{ formatTime(img.modTime) }}<span v-if="img.model"> · {{ img.model }}</span>

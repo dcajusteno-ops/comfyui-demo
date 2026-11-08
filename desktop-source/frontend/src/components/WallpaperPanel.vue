@@ -64,13 +64,13 @@ const handleClear = async () => {
 </script>
 
 <template>
-  <Card class="rounded-[28px] border-border/70 bg-card shadow-none">
+  <Card class="rounded-2xl border-border/70 bg-card shadow-none">
     <CardHeader>
       <CardTitle class="text-lg">背景壁纸</CardTitle>
       <CardDescription>给整个界面铺一张底图，侧栏、卡片和浮层会半透明地透出它。</CardDescription>
     </CardHeader>
     <CardContent class="grid gap-5">
-      <div class="overflow-hidden rounded-[24px] border border-border bg-background">
+      <div class="overflow-hidden rounded-2xl border border-border bg-background">
         <div v-if="hasImage && !previewFailed" class="relative aspect-[16/10] overflow-hidden bg-muted/30">
           <img
             :src="wallpaperUrl"
@@ -123,6 +123,7 @@ const handleClear = async () => {
           <Switch
             :model-value="wallpaper.enabled"
             :disabled="!hasImage"
+            aria-label="启用壁纸"
             @update:model-value="updateWallpaper({ enabled: $event })"
           />
         </div>
@@ -164,6 +165,7 @@ const handleClear = async () => {
             :max="1"
             :step="0.05"
             :disabled="!hasImage"
+            thumb-label="背景压暗程度"
             @update:model-value="updateWallpaper({ dim: toNumber($event) })"
           />
         </div>
@@ -179,6 +181,7 @@ const handleClear = async () => {
             :max="1"
             :step="0.02"
             :disabled="!hasImage"
+            thumb-label="面板不透明度"
             @update:model-value="updateWallpaper({ surfaceAlpha: toNumber($event) })"
           />
           <p class="text-xs text-muted-foreground">调低面板会更透、壁纸更明显；调高则界面更实。</p>
@@ -192,6 +195,7 @@ const handleClear = async () => {
           <Switch
             :model-value="wallpaper.blur"
             :disabled="!hasImage"
+            aria-label="面板毛玻璃"
             @update:model-value="updateWallpaper({ blur: $event })"
           />
         </div>

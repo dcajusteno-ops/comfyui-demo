@@ -141,7 +141,7 @@ onMounted(loadCustomLinks)
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <Button :variant="variant" :size="size" :class="showText ? 'gap-2' : ''" :title="text">
+      <Button :variant="variant" :size="size" :class="showText ? 'gap-2' : ''" :title="text" :aria-label="text">
         <Link class="w-4 h-4" />
         <span v-if="showText">{{ text }}</span>
       </Button>
@@ -156,11 +156,11 @@ onMounted(loadCustomLinks)
         class="flex items-center gap-2 cursor-pointer w-full"
         @click="openLink(link.url)"
       >
-        <div class="w-5 h-5 rounded text-[9px] font-bold bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20 text-primary">
+        <div class="w-5 h-5 rounded text-[11px] font-bold bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20 text-primary">
           {{ link.icon }}
         </div>
         <span class="flex-1 truncate">{{ link.name }}</span>
-        <ExternalLink class="w-3 h-3 text-muted-foreground opacity-50" />
+        <ExternalLink class="w-3 h-3 text-muted-foreground opacity-80" />
       </DropdownMenuItem>
 
       <template v-if="customLinks.length > 0">
@@ -172,11 +172,11 @@ onMounted(loadCustomLinks)
           class="flex items-center gap-2 cursor-pointer w-full"
           @click="openLink(link.url)"
         >
-          <div class="w-5 h-5 rounded text-[9px] font-bold bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20 text-blue-500">
+          <div class="w-5 h-5 rounded text-[11px] font-bold bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20 text-blue-600 dark:text-blue-400">
             {{ link.icon || getIconLetters(link.name) }}
           </div>
           <span class="flex-1 truncate">{{ link.name }}</span>
-          <ExternalLink class="w-3 h-3 text-muted-foreground opacity-50" />
+          <ExternalLink class="w-3 h-3 text-muted-foreground opacity-80" />
         </DropdownMenuItem>
       </template>
 
@@ -208,7 +208,7 @@ onMounted(loadCustomLinks)
             class="flex items-center justify-between p-3 rounded-md border bg-background hover:bg-accent/50 group transition-all"
           >
             <div class="flex items-center gap-3 min-w-0">
-              <div class="w-7 h-7 rounded text-[9px] font-bold bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20 text-blue-500">
+              <div class="w-7 h-7 rounded text-[11px] font-bold bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20 text-blue-600 dark:text-blue-400">
                 {{ link.icon || getIconLetters(link.name) }}
               </div>
               <div class="min-w-0">
@@ -232,7 +232,7 @@ onMounted(loadCustomLinks)
             </div>
           </div>
         </div>
-        <div v-else class="flex flex-col items-center justify-center py-6 text-muted-foreground opacity-50">
+        <div v-else class="flex flex-col items-center justify-center py-6 text-muted-foreground opacity-80">
           <Globe class="w-8 h-8 mb-2" />
           <span class="text-sm">暂无自定义链接</span>
         </div>
@@ -240,22 +240,22 @@ onMounted(loadCustomLinks)
         <div class="border rounded-md p-3 space-y-3 bg-muted/20">
           <div class="flex items-center justify-between">
             <h4 class="text-sm font-semibold">{{ isEditing ? '编辑链接' : '添加新链接' }}</h4>
-            <Button v-if="isEditing" size="icon" variant="ghost" class="h-6 w-6" @click="resetForm">
+            <Button v-if="isEditing" size="icon" variant="ghost" class="h-6 w-6" aria-label="关闭链接表单" @click="resetForm">
               <X class="w-3 h-3" />
             </Button>
           </div>
           <div class="space-y-2">
             <div class="space-y-1">
               <Label class="text-xs">名称</Label>
-              <Input v-model="formData.name" placeholder="例如：Civitai" class="h-8 select-text" />
+              <Input v-model="formData.name" aria-label="链接名称" placeholder="例如：Civitai" class="h-8 select-text" />
             </div>
             <div class="space-y-1">
               <Label class="text-xs">网址</Label>
-              <Input v-model="formData.url" placeholder="https://example.com" class="h-8 font-mono text-xs select-text" />
+              <Input v-model="formData.url" aria-label="链接网址" placeholder="https://example.com" class="h-8 font-mono text-xs select-text" />
             </div>
             <div class="space-y-1">
               <Label class="text-xs">图标文字（可选，最多 2 个字符）</Label>
-              <Input v-model="formData.icon" placeholder="例如：CV" class="h-8 select-text" maxlength="2" />
+              <Input v-model="formData.icon" aria-label="图标文字" placeholder="例如：CV" class="h-8 select-text" maxlength="2" />
             </div>
           </div>
           <div class="flex justify-end gap-2">

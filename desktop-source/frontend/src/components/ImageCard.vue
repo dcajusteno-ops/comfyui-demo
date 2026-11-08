@@ -86,11 +86,18 @@ const handleMouseLeave = () => {
       class="group relative rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden cursor-pointer transition-all duration-300 ease-out select-none"
       :class="{ 'ring-2 ring-primary bg-accent': selected }"
       :style="tiltStyle"
-      @click="selectable ? $emit('toggle') : $emit('view')"
       @mouseenter="handleMouseEnter"
       @mousemove="handleMouseMove"
       @mouseleave="handleMouseLeave"
     >
+        <button
+          type="button"
+          class="absolute inset-0 z-20 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+          :aria-label="selectable ? (selected ? `取消选择 ${image.name}` : `选择 ${image.name}`) : `查看 ${image.name}`"
+          :aria-pressed="selectable ? selected : undefined"
+          @click="selectable ? $emit('toggle') : $emit('view')"
+        ></button>
+
         <div 
             class="absolute pointer-events-none z-20 w-64 h-64 rounded-full bg-white/20 blur-3xl transition-opacity duration-300"
             :style="glareStyle"
@@ -124,12 +131,13 @@ const handleMouseLeave = () => {
             </div>
 
             <!-- Hover Actions -->
-            <div v-if="!selectable" class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 flex flex-col gap-2 z-30">
+            <div v-if="!selectable" class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 group-focus-within:translate-x-0 flex flex-col gap-2 z-30">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger as-child>
                         <button 
                            class="h-9 w-9 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-lg hover:bg-white hover:text-red-500 transition-all hover:scale-110 active:scale-90"
+                           aria-label="管理收藏"
                            @click.stop="emit('manage-favorites', image)" 
                         >
                             <Heart class="h-4 w-4" :class="{ 'fill-red-500 text-red-500': image.isFavorite }" />
@@ -146,7 +154,8 @@ const handleMouseLeave = () => {
                   <Tooltip>
                     <TooltipTrigger as-child>
                         <button 
-                           class="h-9 w-9 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-lg hover:bg-white hover:text-amber-500 transition-all hover:scale-110 active:scale-90"
+                           class="h-9 w-9 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-lg hover:bg-white hover:text-amber-600 transition-all hover:scale-110 active:scale-90"
+                           aria-label="打开文件位置"
                            @click.stop="$emit('open-location', image)" 
                         >
                             <FileImage class="h-4 w-4" />
@@ -163,6 +172,7 @@ const handleMouseLeave = () => {
                     <TooltipTrigger as-child>
                         <button 
                            class="h-9 w-9 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-lg hover:bg-white hover:text-blue-500 transition-all hover:scale-110 active:scale-90"
+                           aria-label="管理标签"
                            @click.stop="$emit('manage-tags', image)" 
                         >
                             <Tags class="h-4 w-4" />
@@ -179,6 +189,7 @@ const handleMouseLeave = () => {
                     <TooltipTrigger as-child>
                         <button 
                            class="h-9 w-9 rounded-full bg-white/90 text-destructive dark:bg-black/60 dark:text-white backdrop-blur-md flex items-center justify-center shadow-lg hover:bg-destructive hover:text-white transition-all hover:scale-110 active:scale-90"
+                           aria-label="删除图片"
                            @click.stop="$emit('delete')" 
                         >
                             <Trash2 class="h-4 w-4" />
@@ -195,8 +206,8 @@ const handleMouseLeave = () => {
         <div class="p-4 flex items-center justify-between gap-2 bg-gradient-to-b from-card to-card/50">
             <span class="text-sm font-semibold truncate flex-1 min-w-0 text-foreground/90" :title="image.name">{{ image.name }}</span>
             <div class="flex items-center gap-1 shrink-0">
-                <StickyNote v-if="hasNote" class="h-3 w-3 text-amber-500" />
-                <span class="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">{{ (image.size / 1024 / 1024).toFixed(2) }}MB</span>
+                <StickyNote v-if="hasNote" class="h-3 w-3 text-amber-600" />
+                <span class="text-[11px] font-mono bg-muted px-1.5 py-0.5 rounded text-foreground/70">{{ (image.size / 1024 / 1024).toFixed(2) }}MB</span>
             </div>
         </div>
     </div>

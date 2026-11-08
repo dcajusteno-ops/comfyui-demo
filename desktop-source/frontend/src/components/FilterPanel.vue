@@ -24,7 +24,7 @@ const resetFilters = () => {
 <template>
   <Popover>
     <PopoverTrigger as-child>
-      <Button variant="ghost" size="icon" title="高级筛选">
+      <Button variant="ghost" size="icon" title="高级筛选" aria-label="高级筛选">
         <Filter
           class="h-4 w-4"
           :class="{ 'text-primary fill-primary/20': filters.dateRange.start || filters.dateRange.end || filters.size.min || filters.size.max || filters.dimensions.minW || filters.dimensions.minH }"
@@ -50,27 +50,27 @@ const resetFilters = () => {
         <div class="space-y-2">
           <Label class="text-xs font-semibold text-muted-foreground">日期范围</Label>
           <div class="flex items-center gap-2">
-            <Input type="date" class="h-8 text-xs px-2" v-model="filters.dateRange.start" />
+            <Input type="date" class="h-8 text-xs px-2" aria-label="开始日期" v-model="filters.dateRange.start" />
             <span class="text-muted-foreground">-</span>
-            <Input type="date" class="h-8 text-xs px-2" v-model="filters.dateRange.end" />
+            <Input type="date" class="h-8 text-xs px-2" aria-label="结束日期" v-model="filters.dateRange.end" />
           </div>
         </div>
 
         <div class="space-y-2">
           <Label class="text-xs font-semibold text-muted-foreground">文件大小 (MB)</Label>
           <div class="flex items-center gap-2">
-            <Input type="number" placeholder="最小" class="h-8 text-xs px-2" v-model.number="filters.size.min" />
+            <Input type="number" placeholder="最小" aria-label="最小文件大小（MB）" class="h-8 text-xs px-2" v-model.number="filters.size.min" />
             <span class="text-muted-foreground">-</span>
-            <Input type="number" placeholder="最大" class="h-8 text-xs px-2" v-model.number="filters.size.max" />
+            <Input type="number" placeholder="最大" aria-label="最大文件大小（MB）" class="h-8 text-xs px-2" v-model.number="filters.size.max" />
           </div>
         </div>
 
         <div class="space-y-2">
           <Label class="text-xs font-semibold text-muted-foreground">最小尺寸 (px)</Label>
           <div class="flex items-center gap-2">
-            <Input type="number" placeholder="宽" class="h-8 text-xs px-2" v-model.number="filters.dimensions.minW" />
+            <Input type="number" placeholder="宽" aria-label="最小宽度（px）" class="h-8 text-xs px-2" v-model.number="filters.dimensions.minW" />
             <span class="text-muted-foreground">x</span>
-            <Input type="number" placeholder="高" class="h-8 text-xs px-2" v-model.number="filters.dimensions.minH" />
+            <Input type="number" placeholder="高" aria-label="最小高度（px）" class="h-8 text-xs px-2" v-model.number="filters.dimensions.minH" />
           </div>
         </div>
 

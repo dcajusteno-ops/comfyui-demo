@@ -849,7 +849,7 @@ onMounted(async () => {
 <template>
   <div class="h-full overflow-y-auto bg-background text-foreground">
     <div class="mx-auto flex w-full max-w-[1580px] flex-col gap-6 px-6 py-6">
-      <section class="flex flex-col gap-4 rounded-3xl border border-border/70 bg-card/80 p-5 shadow-sm xl:flex-row xl:items-start xl:justify-between">
+      <section class="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm xl:flex-row xl:items-start xl:justify-between">
         <div class="min-w-0 space-y-2">
           <div class="flex items-center gap-3">
             <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -879,7 +879,7 @@ onMounted(async () => {
         </div>
       </section>
 
-      <Card class="rounded-3xl border-border/70">
+      <Card class="rounded-2xl border-border/70">
         <CardHeader class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div class="space-y-1">
             <CardTitle class="text-lg text-primary">正向编辑区</CardTitle>
@@ -897,7 +897,7 @@ onMounted(async () => {
             <Label>基础正向 Prompt</Label>
             <textarea
               v-model="positiveBase"
-              class="min-h-[120px] w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm leading-6 outline-none ring-0"
+              class="min-h-[120px] w-full rounded-xl border border-control-border bg-background px-4 py-3 text-sm leading-6 outline-none ring-0"
               placeholder="可直接粘贴当前项目的正向 Prompt，或者在下方继续拼装。"
             />
           </div>
@@ -948,9 +948,9 @@ onMounted(async () => {
                     <div v-if="item.textZh && item.textZh !== item.text" class="mt-0.5 truncate text-xs text-muted-foreground">{{ item.textZh }}</div>
                   </div>
                   <div class="flex shrink-0 items-center gap-1 rounded-lg border border-border/60 bg-muted/40 p-0.5">
-                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-[11px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-30" :disabled="index === 0" @click="movePart('positive', index, 'up')">↑</button>
-                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-[11px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-30" :disabled="index === positiveParts.length - 1" @click="movePart('positive', index, 'down')">↓</button>
-                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive" @click="removePart('positive', item.key)">
+                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-[11px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-30" aria-label="上移提示词片段" :disabled="index === 0" @click="movePart('positive', index, 'up')">↑</button>
+                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-[11px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-30" aria-label="下移提示词片段" :disabled="index === positiveParts.length - 1" @click="movePart('positive', index, 'down')">↓</button>
+                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive" aria-label="移除提示词片段" @click="removePart('positive', item.key)">
                       <X class="h-3 w-3" />
                     </button>
                   </div>
@@ -964,14 +964,14 @@ onMounted(async () => {
             <textarea
               :value="finalPositivePrompt"
               readonly
-              class="min-h-[120px] w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm leading-6 outline-none ring-0"
+              class="min-h-[120px] w-full rounded-xl border border-control-border bg-background px-4 py-3 text-sm leading-6 outline-none ring-0"
               placeholder="正向结果会显示在这里"
             />
           </div>
         </CardContent>
       </Card>
 
-      <Card class="rounded-3xl border-border/70">
+      <Card class="rounded-2xl border-border/70">
         <CardHeader class="space-y-4">
           <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div class="space-y-1">
@@ -1137,12 +1137,13 @@ onMounted(async () => {
                     <div class="mt-1 break-all text-sm text-muted-foreground">{{ entry.text_en || '暂无英文内容' }}</div>
                   </div>
                   <div class="flex items-center gap-2">
-                    <button class="text-muted-foreground transition-colors hover:text-rose-500" @click="toggleFavorite(entry.id)">
+                    <button class="text-muted-foreground transition-colors hover:text-rose-500" :aria-label="favoriteIdSet.has(entry.id) ? '取消收藏词条' : '收藏词条'" :aria-pressed="favoriteIdSet.has(entry.id)" @click="toggleFavorite(entry.id)">
                       <Heart class="h-4 w-4" :class="favoriteIdSet.has(entry.id) ? 'fill-rose-500 text-rose-500' : ''" />
                     </button>
                     <button
                       v-if="isCustomEntry(entry)"
                       class="text-muted-foreground transition-colors hover:text-destructive"
+                      aria-label="删除自定义词条"
                       @click="requestDeleteCustomPrompt(entry)"
                     >
                       <Trash2 class="h-4 w-4" />
@@ -1175,10 +1176,10 @@ onMounted(async () => {
         </CardContent>
       </Card>
 
-      <Card class="rounded-3xl border-border/70">
+      <Card class="rounded-2xl border-border/70">
         <CardHeader class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div class="space-y-1">
-            <CardTitle class="text-lg text-rose-500">反向编辑区</CardTitle>
+            <CardTitle class="text-lg text-rose-700 dark:text-rose-300">反向编辑区</CardTitle>
             <CardDescription>用于整理负向 Prompt，支持预设词包和手动词条补充。</CardDescription>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -1193,7 +1194,7 @@ onMounted(async () => {
             <Label>基础反向 Prompt</Label>
             <textarea
               v-model="negativeBase"
-              class="min-h-[120px] w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm leading-6 outline-none ring-0"
+              class="min-h-[120px] w-full rounded-xl border border-control-border bg-background px-4 py-3 text-sm leading-6 outline-none ring-0"
               placeholder="可直接粘贴当前项目的反向 Prompt，或者在下方继续拼装。"
             />
           </div>
@@ -1226,7 +1227,7 @@ onMounted(async () => {
 
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-sm font-medium text-rose-500">已选反向词条</span>
+              <span class="text-sm font-medium text-rose-700 dark:text-rose-300">已选反向词条</span>
               <Badge variant="secondary">{{ negativeParts.length }} 条</Badge>
             </div>
             <div v-if="negativeParts.length === 0" class="rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">
@@ -1240,13 +1241,13 @@ onMounted(async () => {
                   class="flex min-w-[148px] max-w-[220px] items-center gap-2 rounded-xl border border-rose-500/15 bg-background px-3 py-2 shadow-sm"
                 >
                   <div class="min-w-0 flex-1">
-                    <div class="truncate text-sm font-semibold text-rose-500/90">{{ item.text || item.textZh }}</div>
+                    <div class="truncate text-sm font-semibold text-rose-700 dark:text-rose-300">{{ item.text || item.textZh }}</div>
                     <div v-if="item.textZh && item.textZh !== item.text" class="mt-0.5 truncate text-xs text-muted-foreground">{{ item.textZh }}</div>
                   </div>
                   <div class="flex shrink-0 items-center gap-1 rounded-lg border border-border/60 bg-muted/40 p-0.5">
-                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-[11px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-30" :disabled="index === 0" @click="movePart('negative', index, 'up')">↑</button>
-                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-[11px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-30" :disabled="index === negativeParts.length - 1" @click="movePart('negative', index, 'down')">↓</button>
-                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive" @click="removePart('negative', item.key)">
+                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-[11px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-30" aria-label="上移提示词片段" :disabled="index === 0" @click="movePart('negative', index, 'up')">↑</button>
+                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-[11px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-30" aria-label="下移提示词片段" :disabled="index === negativeParts.length - 1" @click="movePart('negative', index, 'down')">↓</button>
+                    <button class="flex h-5 w-5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive" aria-label="移除提示词片段" @click="removePart('negative', item.key)">
                       <X class="h-3 w-3" />
                     </button>
                   </div>
@@ -1260,14 +1261,14 @@ onMounted(async () => {
             <textarea
               :value="finalNegativePrompt"
               readonly
-              class="min-h-[120px] w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm leading-6 outline-none ring-0"
+              class="min-h-[120px] w-full rounded-xl border border-control-border bg-background px-4 py-3 text-sm leading-6 outline-none ring-0"
               placeholder="反向结果会显示在这里"
             />
           </div>
         </CardContent>
       </Card>
 
-      <Card class="rounded-3xl border-border/70">
+      <Card class="rounded-2xl border-border/70">
         <CardHeader>
           <CardTitle class="text-lg">模板保存设置</CardTitle>
           <CardDescription>保存前可自定义模板名称和模板分类，组合模板保存后可直接复制使用。</CardDescription>

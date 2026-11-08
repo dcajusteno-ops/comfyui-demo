@@ -26,10 +26,11 @@ const props = defineProps({
   name: { type: String, required: false },
   required: { type: Boolean, required: false },
   class: { type: null, required: false },
+  thumbLabel: { type: String, required: false },
 });
 const emits = defineEmits(["update:modelValue", "valueCommit"]);
 
-const delegatedProps = reactiveOmit(props, "class");
+const delegatedProps = reactiveOmit(props, "class", "thumbLabel");
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits);
 </script>
@@ -59,6 +60,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
     <SliderThumb
       v-for="(_, key) in modelValue"
       :key="key"
+      :aria-label="thumbLabel"
       data-slot="slider-thumb"
       class="bg-white border-primary ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
     />

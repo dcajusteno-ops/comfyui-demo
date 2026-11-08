@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -56,7 +56,7 @@ const showToast = (message, type) => {
   return toast(message)
 }
 
-const confirmAction = async (message) => window.confirm(message)
+const confirmAction = inject('confirm', async (message) => window.confirm(message))
 
 const {
   sourceImages,
@@ -442,6 +442,13 @@ const trendPoints = computed(() => {
   })
 })
 
+const trendChartAriaLabel = computed(() => {
+  if (!trendPoints.value.length) return '产出趋势折线图，暂无数据'
+  const latest = trendPoints.value[trendPoints.value.length - 1]
+  const modeLabel = viewMode.value === 'year' ? '按年' : viewMode.value === 'month' ? '按月' : '按日'
+  return `${modeLabel}产出趋势折线图，共 ${trendPoints.value.length} 个数据点，最高 ${trendMaxCount.value} 张，最新节点 ${latest.axisLabel} 为 ${latest.count} 张`
+})
+
 const createSmoothPath = (points) => {
   if (!points.length) return ''
   if (points.length === 1) return `M ${points[0].x} ${points[0].y}`
@@ -598,7 +605,7 @@ const insightCards = computed(() => [
   <div class="h-full overflow-y-auto bg-background">
     <div class="mx-auto flex max-w-[1460px] flex-col gap-6 p-6 pb-10">
       <section class="space-y-6">
-        <Card class="rounded-[28px] border-border/70 bg-card p-6 shadow-none">
+        <Card class="rounded-2xl border-border/70 bg-card p-6 shadow-none">
           <div class="flex flex-col gap-5">
             <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div class="space-y-3">
@@ -614,10 +621,10 @@ const insightCards = computed(() => [
 
               <div class="flex flex-wrap items-center gap-3">
                 <div class="inline-flex rounded-full border border-border bg-background p-1">
-                  <button type="button" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="timelineMode === 'day' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'" @click="timelineMode = 'day'">按日</button>
-                  <button type="button" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="timelineMode === 'month' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'" @click="timelineMode = 'month'">按月</button>
+                  <button type="button" :aria-pressed="timelineMode === 'day'" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="timelineMode === 'day' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'" @click="timelineMode = 'day'">按日</button>
+                  <button type="button" :aria-pressed="timelineMode === 'month'" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="timelineMode === 'month' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'" @click="timelineMode = 'month'">按月</button>
                 </div>
-                <Button variant="outline" class="h-10 rounded-full px-4 shadow-none" @click="refreshAll">
+                <Button variant="outline" class="h-10 rounded-full px-4 shadow-none" :aria-busy="loading" @click="refreshAll">
                   <RefreshCw class="mr-2 h-4 w-4" :class="{ 'animate-spin': loading }" />
                   {{ TEXT.refresh }}
                 </Button>
@@ -640,7 +647,7 @@ const insightCards = computed(() => [
         </Card>
 
         <div class="grid gap-6 xl:grid-cols-[minmax(0,0.96fr)_minmax(360px,0.84fr)]">
-          <Card class="rounded-[28px] border-border/70 bg-card p-4 shadow-none">
+          <Card class="rounded-2xl border-border/70 bg-card p-4 shadow-none">
             <div v-if="latestCreation" class="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
               <div class="overflow-hidden rounded-2xl border border-border bg-background">
                 <img :src="latestCreation.path" :alt="latestCreation.name" class="h-full min-h-[220px] w-full object-cover" loading="lazy" />
@@ -673,11 +680,11 @@ const insightCards = computed(() => [
           </Card>
 
           <div class="grid gap-3 md:grid-cols-2">
-            <Card v-for="item in insightCards" :key="item.key" class="rounded-[24px] border-border/70 bg-card p-5 shadow-none">
+            <Card v-for="item in insightCards" :key="item.key" class="rounded-2xl border-border/70 bg-card p-5 shadow-none">
               <div class="flex items-start justify-between gap-3">
                 <div>
                   <p class="text-[13px] text-muted-foreground">{{ item.title }}</p>
-                  <p class="mt-2 text-[1.6rem] font-semibold tracking-tight text-foreground">{{ item.value }}</p>
+                  <p class="mt-2 text-2xl font-semibold tracking-tight text-foreground">{{ item.value }}</p>
                 </div>
                 <component :is="item.icon" class="h-5 w-5 text-muted-foreground" />
               </div>
@@ -688,21 +695,20 @@ const insightCards = computed(() => [
       </section>
 
       <section class="space-y-6">
-        <Card class="rounded-[28px] border-border/70 bg-card p-6 shadow-none">
+        <Card class="rounded-2xl border-border/70 bg-card p-6 shadow-none">
           <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div class="space-y-2">
-              <div class="flex items-center gap-2 text-muted-foreground">
-                <BarChart3 class="h-4 w-4" />
-                <span class="text-[13px] font-medium">{{ TEXT.trendTitle }}</span>
+              <div class="flex items-center gap-2">
+                <BarChart3 class="h-4 w-4 text-muted-foreground" />
+                <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ TEXT.trendTitle }}</h2>
               </div>
-              <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ TEXT.trendTitle }}</h2>
               <p class="max-w-2xl text-[13px] leading-5 text-muted-foreground">{{ TEXT.trendDesc }}</p>
             </div>
 
             <div class="inline-flex rounded-full border border-border bg-background p-1">
-              <button type="button" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="viewMode === 'year' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'" @click="viewMode = 'year'">按年</button>
-              <button type="button" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="viewMode === 'month' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'" @click="viewMode = 'month'">按月</button>
-              <button type="button" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="viewMode === 'day' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'" @click="viewMode = 'day'">按日</button>
+              <button type="button" :aria-pressed="viewMode === 'year'" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="viewMode === 'year' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'" @click="viewMode = 'year'">按年</button>
+              <button type="button" :aria-pressed="viewMode === 'month'" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="viewMode === 'month' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'" @click="viewMode = 'month'">按月</button>
+              <button type="button" :aria-pressed="viewMode === 'day'" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="viewMode === 'day' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'" @click="viewMode = 'day'">按日</button>
             </div>
           </div>
 
@@ -724,7 +730,13 @@ const insightCards = computed(() => [
                 </div>
               </div>
 
-              <svg :width="chartCanvasWidth" :height="chartHeight" class="min-w-full overflow-visible">
+              <svg
+                :width="chartCanvasWidth"
+                :height="chartHeight"
+                class="min-w-full overflow-visible"
+                role="img"
+                :aria-label="trendChartAriaLabel"
+              >
                 <g>
                   <line v-for="tick in yTicks" :key="tick.value" :x1="chartPadding.left" :x2="chartCanvasWidth - chartPadding.right" :y1="tick.y" :y2="tick.y" stroke="currentColor" class="text-border/70" stroke-dasharray="4 6" />
                   <text v-for="tick in yTicks" :key="`label-${tick.value}`" :x="chartPadding.left - 10" :y="tick.y + 4" text-anchor="end" class="fill-muted-foreground text-[11px]">{{ tick.value }}</text>
@@ -778,20 +790,19 @@ const insightCards = computed(() => [
           </div>
         </Card>
 
-        <Card class="rounded-[28px] border-border/70 bg-card p-6 shadow-none">
+        <Card class="rounded-2xl border-border/70 bg-card p-6 shadow-none">
           <div class="space-y-2">
-            <div class="flex items-center gap-2 text-muted-foreground">
-              <CalendarDays class="h-4 w-4" />
-              <span class="text-[13px] font-medium">{{ TEXT.heatmapTitle }}</span>
+            <div class="flex items-center gap-2">
+              <CalendarDays class="h-4 w-4 text-muted-foreground" />
+              <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ TEXT.heatmapTitle }}</h2>
             </div>
-            <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ TEXT.heatmapTitle }}</h2>
             <p class="text-[13px] leading-5 text-muted-foreground">{{ TEXT.heatmapDesc }}</p>
           </div>
 
-          <div class="mt-6 overflow-x-auto pb-2">
+          <div class="mt-6 overflow-x-auto pb-2" role="group" aria-label="活动热力图">
             <div class="inline-flex min-w-full gap-2">
               <div v-for="week in heatmapWeeks" :key="week.key" class="flex min-w-[18px] flex-col gap-2">
-                <div class="h-4 text-center text-[10px] text-muted-foreground">{{ week.monthLabel }}</div>
+                <div class="h-4 text-center text-[11px] text-muted-foreground">{{ week.monthLabel }}</div>
                 <button
                   v-for="day in week.days"
                   :key="day.key"
@@ -799,6 +810,7 @@ const insightCards = computed(() => [
                   class="h-[18px] w-[18px] rounded-md border transition-transform duration-150 hover:scale-110"
                   :class="[heatmapLevelClass(day.count, day.isFuture), day.count && !day.isFuture ? 'shadow-sm' : '']"
                   :title="`${day.label} · ${day.count} 张`"
+                  :aria-label="`${day.label}，${day.count} 张作品`"
                   :disabled="!day.count || day.isFuture"
                   @click="jumpToTimelineKey(day.key)"
                 />
@@ -815,20 +827,19 @@ const insightCards = computed(() => [
       </section>
 
       <section id="stats-timeline-section" class="grid gap-6 xl:h-[calc(100vh-12rem)] xl:grid-cols-[minmax(0,1.08fr)_380px]">
-        <Card class="rounded-[28px] border-border/70 bg-card p-6 shadow-none xl:flex xl:h-full xl:flex-col xl:overflow-hidden">
+        <Card class="rounded-2xl border-border/70 bg-card p-6 shadow-none xl:flex xl:h-full xl:flex-col xl:overflow-hidden">
           <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div class="space-y-2">
-              <div class="flex items-center gap-2 text-muted-foreground">
-                <History class="h-4 w-4" />
-                <span class="text-[13px] font-medium">{{ TEXT.timelineTitle }}</span>
+              <div class="flex items-center gap-2">
+                <History class="h-4 w-4 text-muted-foreground" />
+                <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ TEXT.timelineTitle }}</h2>
               </div>
-              <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ TEXT.timelineTitle }}</h2>
               <p class="max-w-3xl text-[13px] leading-5 text-muted-foreground">{{ TEXT.timelineDesc }}</p>
             </div>
 
             <div class="inline-flex rounded-full border border-border bg-background p-1">
-              <button type="button" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="timelineMode === 'day' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'" @click="timelineMode = 'day'">按日</button>
-              <button type="button" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="timelineMode === 'month' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'" @click="timelineMode = 'month'">按月</button>
+              <button type="button" :aria-pressed="timelineMode === 'day'" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="timelineMode === 'day' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'" @click="timelineMode = 'day'">按日</button>
+              <button type="button" :aria-pressed="timelineMode === 'month'" class="rounded-full px-4 py-2 text-[13px] transition-colors" :class="timelineMode === 'month' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'" @click="timelineMode = 'month'">按月</button>
             </div>
           </div>
 
@@ -891,7 +902,7 @@ const insightCards = computed(() => [
           </div>
         </Card>
 
-        <Card class="rounded-[28px] border-border/70 bg-card p-6 shadow-none xl:flex xl:h-full xl:flex-col xl:overflow-hidden">
+        <Card class="rounded-2xl border-border/70 bg-card p-6 shadow-none xl:flex xl:h-full xl:flex-col xl:overflow-hidden">
           <div class="space-y-2">
             <div class="flex items-center gap-2 text-muted-foreground">
               <ArrowUpRight class="h-4 w-4" />
@@ -929,7 +940,7 @@ const insightCards = computed(() => [
             <div class="xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-2 custom-scrollbar">
               <div v-if="visibleTimelineImagesList.length" class="grid gap-3">
                 <article v-for="(image, index) in visibleTimelineImagesList" :key="image.relPath" class="overflow-hidden rounded-2xl border border-border bg-background">
-                  <button type="button" class="block w-full" @click="openTimelineLightbox(activeTimelineEntry.images, index)">
+                  <button type="button" class="block w-full" :aria-label="`预览 ${image.name}`" @click="openTimelineLightbox(activeTimelineEntry.images, index)">
                     <div class="aspect-[16/9] overflow-hidden bg-muted/20">
                       <img :src="image.path" :alt="image.name" class="h-full w-full object-cover" loading="lazy" />
                     </div>
@@ -947,7 +958,7 @@ const insightCards = computed(() => [
                         <FolderOpen class="mr-1.5 h-3.5 w-3.5" />
                         {{ TEXT.locate }}
                       </Button>
-                      <Button variant="outline" size="sm" class="h-8 rounded-full border-red-500/30 px-3 text-xs text-red-500 shadow-none hover:bg-red-500/8 hover:text-red-400" @click="handleTimelineDelete(image)">{{ TEXT.delete }}</Button>
+                      <Button variant="outline" size="sm" class="h-8 rounded-full border-red-500/30 px-3 text-xs text-red-600 dark:text-red-400 shadow-none hover:bg-red-500/8 hover:text-red-700 dark:hover:text-red-300" @click="handleTimelineDelete(image)">{{ TEXT.delete }}</Button>
                     </div>
                   </div>
                 </article>

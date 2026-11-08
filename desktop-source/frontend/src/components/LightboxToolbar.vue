@@ -55,11 +55,12 @@ const promptAssistantPayload = computed(() => ({
         <button
           class="relative rounded-full p-2 text-white/70 transition-opacity hover:bg-white/10 hover:text-white"
           title="标签管理"
+          aria-label="标签管理"
         >
           <Tags class="h-6 w-6" />
           <span
             v-if="imageTags.length > 0"
-            class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px]"
+            class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[11px]"
           >
             {{ imageTags.length }}
           </span>
@@ -81,6 +82,7 @@ const promptAssistantPayload = computed(() => ({
                   variant="ghost"
                   size="icon"
                   class="ml-1 h-4 w-4 rounded-full p-0 hover:bg-white/20"
+                  :aria-label="`移除标签 ${tag.name}`"
                   @click="emit('remove-tag', currentDisplayImage, tag.id)"
                 >
                   <X class="h-3 w-3" />
@@ -114,6 +116,7 @@ const promptAssistantPayload = computed(() => ({
     <button
       class="rounded-full p-2 text-white/70 transition-opacity hover:bg-white/10 hover:text-amber-500"
       title="打开文件位置"
+      aria-label="打开文件位置"
       @click="emit('open-location', currentDisplayImage)"
     >
       <FileImage class="h-6 w-6" />
@@ -122,6 +125,7 @@ const promptAssistantPayload = computed(() => ({
     <button
       class="rounded-full p-2 text-white/70 transition-opacity hover:bg-white/10 hover:text-pink-400"
       title="收藏分组"
+      aria-label="收藏分组"
       @click="emit('open-favorite-groups')"
     >
       <FolderOpen class="h-6 w-6" />
@@ -130,6 +134,7 @@ const promptAssistantPayload = computed(() => ({
     <button
       class="rounded-full p-2 text-white/70 transition-opacity hover:bg-white/10 hover:text-red-500"
       title="删除图片"
+      aria-label="删除图片"
       @click="emit('delete', currentDisplayImage)"
     >
       <Trash2 class="h-6 w-6" />
@@ -138,6 +143,7 @@ const promptAssistantPayload = computed(() => ({
     <button
       class="rounded-full p-2 text-white/70 transition-opacity hover:bg-white/10 hover:text-white"
       title="收藏"
+      aria-label="收藏"
       @click="emit('toggle-favorite', currentDisplayImage)"
     >
       <Heart class="h-6 w-6" :class="{ 'fill-red-500 text-red-500': currentDisplayImage?.isFavorite }" />
@@ -148,6 +154,7 @@ const promptAssistantPayload = computed(() => ({
       download
       class="rounded-full p-2 text-white/70 transition-opacity hover:bg-white/10 hover:text-white"
       title="下载"
+      aria-label="下载"
     >
       <Download class="h-6 w-6" />
     </a>
@@ -155,6 +162,7 @@ const promptAssistantPayload = computed(() => ({
     <button
       class="rounded-full p-2 text-white/70 transition-opacity hover:bg-white/10 hover:text-emerald-300"
       title="提示词提示器"
+      aria-label="提示词提示器"
       @click="emit('open-prompt-assistant', promptAssistantPayload)"
     >
       <Sparkles class="h-6 w-6" />
@@ -163,6 +171,7 @@ const promptAssistantPayload = computed(() => ({
     <button
       class="rounded-full p-2 text-white/50 transition-all hover:bg-white/10 hover:text-white"
       title="关闭"
+      aria-label="关闭"
       @click="emit('close')"
     >
       <X class="h-6 w-6" />

@@ -79,8 +79,8 @@ const viewportBox = computed(() => {
   <div class="pointer-events-none absolute inset-0 z-[60]">
     <button
       type="button"
-      class="pointer-events-auto absolute left-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-black/50 backdrop-blur-xl transition-colors hover:bg-white/15 hover:text-white"
-      :class="visible ? 'text-blue-300' : 'text-white/60'"
+      class="pointer-events-auto absolute left-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-black/70 backdrop-blur-xl transition-colors hover:bg-white/15 hover:text-white"
+      :class="visible ? 'text-blue-300' : 'text-white/80'"
       :title="visible ? '隐藏生成参数' : '显示生成参数'"
       @click="$emit('toggle')"
     >
@@ -94,10 +94,10 @@ const viewportBox = computed(() => {
       <div
         v-for="chip in chips"
         :key="chip.label"
-        class="flex max-w-full items-center gap-1.5 rounded-md border border-white/10 bg-black/55 px-2 py-1 text-[11px] shadow-lg backdrop-blur-xl"
+        class="flex max-w-full items-center gap-1.5 rounded-md border border-white/10 bg-black/75 px-2 py-1 text-[11px] shadow-lg backdrop-blur-xl"
       >
-        <span class="shrink-0 text-white/45">{{ chip.label }}</span>
-        <span class="truncate font-mono text-white/85">{{ chip.value }}</span>
+        <span class="shrink-0 text-white/70">{{ chip.label }}</span>
+        <span class="truncate font-mono text-white/95">{{ chip.value }}</span>
       </div>
     </div>
 

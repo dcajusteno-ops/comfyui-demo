@@ -286,6 +286,7 @@ const confirmDelete = async () => {
                       variant="ghost"
                       size="icon"
                       class="h-8 w-8 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                      :aria-label="`重命名分组 ${group.name}`"
                       @click="startRename(group)"
                     >
                       <Pencil class="h-3.5 w-3.5" />
@@ -294,6 +295,7 @@ const confirmDelete = async () => {
                       variant="ghost"
                       size="icon"
                       class="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      :aria-label="`删除分组 ${group.name}`"
                       :disabled="group.id === 'default'"
                       @click="deleteGroupId = group.id"
                     >

@@ -706,9 +706,10 @@ onUnmounted(() => {
                 </div>
                 <template v-else>
                   <div class="grid gap-4 md:grid-cols-2">
-                    <label class="space-y-2">
+                    <label for="performance-mode" class="space-y-2">
                       <div class="text-sm font-medium">当前模式</div>
                       <AppSelect
+                        id="performance-mode"
                         v-model="performanceForm.mode"
                         :options="performanceModeOptions"
                         trigger-class="h-10 w-full rounded-xl border bg-background px-3 pr-2 text-sm"
@@ -730,21 +731,21 @@ onUnmounted(() => {
                         <div class="font-medium">优先显示缩略图</div>
                         <div class="text-sm text-muted-foreground">降低列表阶段的原图解码压力。</div>
                       </div>
-                      <Switch v-model:checked="performanceForm.thumbPreferred" />
+                      <Switch v-model:checked="performanceForm.thumbPreferred" aria-label="优先显示缩略图" />
                     </div>
                     <div class="flex items-center justify-between rounded-xl border bg-background px-4 py-3">
                       <div>
                         <div class="font-medium">后台预热缩略图</div>
                         <div class="text-sm text-muted-foreground">在空闲时提前生成缩略图，降低后续等待。</div>
                       </div>
-                      <Switch v-model:checked="performanceForm.backgroundVariantWarmup" />
+                      <Switch v-model:checked="performanceForm.backgroundVariantWarmup" aria-label="后台预热缩略图" />
                     </div>
                     <div class="flex items-center justify-between rounded-xl border bg-background px-4 py-3">
                       <div>
                         <div class="font-medium">延迟读取元数据</div>
                         <div class="text-sm text-muted-foreground">先保证列表流畅度，详情页再补齐完整信息。</div>
                       </div>
-                      <Switch v-model:checked="performanceForm.metadataLazy" />
+                      <Switch v-model:checked="performanceForm.metadataLazy" aria-label="延迟读取元数据" />
                     </div>
                   </div>
                 </template>
@@ -777,10 +778,10 @@ onUnmounted(() => {
                       <div class="text-xs text-muted-foreground">{{ group.paths?.length || 0 }} 张图片</div>
                     </div>
                     <div class="flex gap-2">
-                      <Button variant="outline" size="icon" @click="startFavoriteRename(group)">
+                      <Button variant="outline" size="icon" :aria-label="`重命名分组 ${group.name}`" @click="startFavoriteRename(group)">
                         <Pencil class="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="icon" :disabled="group.id === 'default' || deletingFavoriteGroup" @click="requestDeleteFavoriteGroup(group.id)">
+                      <Button variant="outline" size="icon" :aria-label="`删除分组 ${group.name}`" :disabled="group.id === 'default' || deletingFavoriteGroup" @click="requestDeleteFavoriteGroup(group.id)">
                         <Trash2 class="h-4 w-4" />
                       </Button>
                     </div>
@@ -795,7 +796,7 @@ onUnmounted(() => {
                   <div class="text-base font-semibold">启用全局快捷键</div>
                   <div class="text-sm text-muted-foreground">程序运行期间，快捷键可用于切换视图或执行快速操作。</div>
                 </div>
-                <Switch v-model:checked="shortcutEnabled" />
+                <Switch v-model:checked="shortcutEnabled" aria-label="启用全局快捷键" />
               </div>
 
               <div v-if="hasDuplicateAccelerators" class="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">

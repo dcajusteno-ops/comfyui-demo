@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,6 +44,8 @@ const actionLabels = {
   add_favorite_group: '加入收藏分组',
   move_to_folder: '移动到目录',
 }
+
+const confirm = inject('confirm', (message) => window.confirm(message))
 
 const loading = ref(true)
 const saving = ref(false)
@@ -271,7 +273,7 @@ const saveRule = async (rule) => {
 const deleteRule = async (ruleId) => {
   const target = store.value.rules.find((rule) => rule.id === ruleId)
   if (!target) return
-  if (!window.confirm(`确定删除“${target.name}”吗？`)) return
+  if (!(await confirm(`确定删除“${target.name}”吗？`))) return
 
   saving.value = true
   try {
@@ -376,7 +378,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="h-full overflow-y-auto overscroll-contain bg-background">
     <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8 pb-10">
-      <Card class="rounded-[30px] border-border/70 bg-card shadow-none">
+      <Card class="rounded-2xl border-border/70 bg-card shadow-none">
         <CardHeader class="space-y-2">
           <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div class="space-y-2">
@@ -394,26 +396,26 @@ onBeforeUnmount(() => {
                 <p class="text-sm font-medium text-foreground">自动处理开关</p>
                 <p class="text-xs text-muted-foreground">关闭后新图片不会自动套用规则</p>
               </div>
-              <Switch :model-value="store.enabled" @update:model-value="setGlobalEnabled" />
+              <Switch :model-value="store.enabled" aria-label="启用自动规则" @update:model-value="setGlobalEnabled" />
             </div>
           </div>
         </CardHeader>
 
         <CardContent class="grid gap-4">
           <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-[22px] border border-border bg-background px-4 py-4">
+            <div class="rounded-xl border border-border bg-background px-4 py-4">
               <p class="text-xs text-muted-foreground">规则总数</p>
               <p class="mt-2 text-2xl font-semibold tracking-tight text-foreground">{{ store.rules.length }}</p>
             </div>
-            <div class="rounded-[22px] border border-border bg-background px-4 py-4">
+            <div class="rounded-xl border border-border bg-background px-4 py-4">
               <p class="text-xs text-muted-foreground">已启用</p>
               <p class="mt-2 text-2xl font-semibold tracking-tight text-foreground">{{ enabledRuleCount }}</p>
             </div>
-            <div class="rounded-[22px] border border-border bg-background px-4 py-4">
+            <div class="rounded-xl border border-border bg-background px-4 py-4">
               <p class="text-xs text-muted-foreground">最近执行</p>
               <p class="mt-2 text-sm font-medium text-foreground">{{ formatDateTime(latestRuleRun?.lastRunAt) }}</p>
             </div>
-            <div class="rounded-[22px] border border-border bg-background px-4 py-4">
+            <div class="rounded-xl border border-border bg-background px-4 py-4">
               <p class="text-xs text-muted-foreground">最近失败</p>
               <p class="mt-2 text-2xl font-semibold tracking-tight text-foreground">{{ failedRuleCount }}</p>
             </div>
@@ -444,7 +446,7 @@ onBeforeUnmount(() => {
 
           <div
             v-if="showRunProgress"
-            class="rounded-[22px] border border-border bg-background px-4 py-4"
+            class="rounded-xl border border-border bg-background px-4 py-4"
           >
             <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div class="space-y-1">
@@ -474,7 +476,7 @@ onBeforeUnmount(() => {
         </CardContent>
       </Card>
 
-      <Card class="rounded-[30px] border-border/70 bg-card shadow-none">
+      <Card class="rounded-2xl border-border/70 bg-card shadow-none">
         <CardHeader class="space-y-2">
           <CardTitle class="text-lg">规则列表</CardTitle>
           <CardDescription>支持搜索、启停、编辑、删除，也支持手动跑一遍规则验证效果。</CardDescription>
@@ -487,7 +489,7 @@ onBeforeUnmount(() => {
               <Input
                 v-model="searchQuery"
                 placeholder="搜索规则名、条件或动作"
-                class="h-11 rounded-2xl border-border/80 bg-background/90 pl-9 shadow-none"
+                class="h-11 rounded-xl border-control-border/80 bg-background/90 pl-9 shadow-none"
               />
             </div>
 
@@ -496,20 +498,20 @@ onBeforeUnmount(() => {
                 v-model="statusFilter"
                 :options="statusFilterOptions"
                 max-height="10rem"
-                trigger-class="h-11 w-full rounded-2xl border border-border/80 bg-background px-4 pr-3 text-sm shadow-none focus:border-ring focus:ring-1 focus:ring-ring/60"
+                trigger-class="h-11 w-full rounded-xl border border-control-border bg-background px-4 pr-3 text-sm shadow-none focus:border-ring focus:ring-1 focus:ring-ring/60"
               />
             </div>
           </div>
 
           <div v-if="loading" class="grid gap-3">
-            <div v-for="index in 3" :key="index" class="h-28 rounded-[24px] bg-muted/60" />
+            <div v-for="index in 3" :key="index" class="h-28 rounded-2xl bg-muted/60" />
           </div>
 
           <div v-else class="grid gap-3">
             <div
               v-for="rule in filteredRules"
               :key="rule.id"
-              class="rounded-[24px] border border-border bg-background px-4 py-4"
+              class="rounded-2xl border border-border bg-background px-4 py-4"
             >
               <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="min-w-0 flex-1 space-y-3">
@@ -540,11 +542,12 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="flex items-center gap-2 self-start">
-                  <Switch :model-value="rule.enabled" @update:model-value="toggleRuleEnabled(rule, $event)" />
+                  <Switch :model-value="rule.enabled" :aria-label="`启用规则 ${rule.name}`" @update:model-value="toggleRuleEnabled(rule, $event)" />
                   <Button
                     variant="ghost"
                     size="icon"
                     class="h-10 w-10 rounded-2xl text-muted-foreground hover:bg-muted"
+                    :aria-label="`编辑规则 ${rule.name}`"
                     @click="openEditDialog(rule)"
                   >
                     <Pencil class="h-4 w-4" />
@@ -553,6 +556,7 @@ onBeforeUnmount(() => {
                     variant="ghost"
                     size="icon"
                     class="h-10 w-10 rounded-2xl text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
+                    :aria-label="`删除规则 ${rule.name}`"
                     @click="deleteRule(rule.id)"
                   >
                     <Trash2 class="h-4 w-4" />
@@ -563,7 +567,7 @@ onBeforeUnmount(() => {
 
             <div
               v-if="filteredRules.length === 0"
-              class="rounded-[24px] border border-dashed border-border bg-background/70 px-4 py-10 text-center text-sm text-muted-foreground"
+              class="rounded-2xl border border-dashed border-border bg-background/70 px-4 py-10 text-center text-sm text-muted-foreground"
             >
               当前筛选条件下没有规则。
             </div>
@@ -571,14 +575,14 @@ onBeforeUnmount(() => {
         </CardContent>
       </Card>
 
-      <Card class="rounded-[30px] border-border/70 bg-card shadow-none">
+      <Card class="rounded-2xl border-border/70 bg-card shadow-none">
         <CardHeader class="space-y-2">
           <CardTitle class="text-lg">执行状态</CardTitle>
           <CardDescription>快速查看最近运行是否正常，方便确认规则是否生效。</CardDescription>
         </CardHeader>
 
         <CardContent class="grid gap-3 text-sm">
-          <div class="flex items-center gap-3 rounded-[22px] border border-border bg-background px-4 py-3">
+          <div class="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
             <Clock3 class="h-4 w-4 text-muted-foreground" />
             <div class="min-w-0">
               <p class="font-medium text-foreground">最近执行时间</p>
@@ -586,7 +590,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div class="flex items-center gap-3 rounded-[22px] border border-border bg-background px-4 py-3">
+          <div class="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
             <CheckCircle2 class="h-4 w-4 text-muted-foreground" />
             <div class="min-w-0">
               <p class="font-medium text-foreground">最近命中规则</p>
@@ -594,7 +598,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div class="flex items-center gap-3 rounded-[22px] border border-border bg-background px-4 py-3">
+          <div class="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
             <AlertCircle class="h-4 w-4 text-muted-foreground" />
             <div class="min-w-0">
               <p class="font-medium text-foreground">最近失败信息</p>

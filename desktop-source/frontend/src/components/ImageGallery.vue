@@ -392,7 +392,7 @@ watch(() => props.currentPage, () => {
             <div class="min-w-0">
               <div class="flex items-start gap-4">
                   <div class="min-w-0 flex-1">
-                     <h2 class="break-words text-[2rem] font-semibold leading-tight tracking-tight">
+                     <h2 class="break-words text-2xl font-semibold leading-tight tracking-tight">
                         {{ rootLabel || rootName || '图片库' }}
                         <span v-if="subLabel && subLabel !== '默认'" class="text-muted-foreground font-normal">
                             / {{ subLabel }}
@@ -401,7 +401,7 @@ watch(() => props.currentPage, () => {
                             / {{ childLabel }}
                         </span>
                      </h2>
-                     <p class="mt-0.5 text-xs text-muted-foreground">
+                     <p class="mt-0.5 text-xs text-muted-foreground" aria-live="polite">
                        {{ totalImages > 0 ? `当前结果 ${totalImages} 张` : (hasTopFilters ? '当前目录有图片，但被搜索或筛选条件过滤了' : '当前目录暂无图片') }}
                      </p>
                   </div>
@@ -413,8 +413,9 @@ watch(() => props.currentPage, () => {
                           <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                           <Input
                             :model-value="searchQuery"
+                            aria-label="搜索图片"
                             placeholder="搜索文件名、Prompt、模型、LoRA..."
-                            class="h-10 rounded-2xl border-border/80 bg-background/90 pl-9 pr-10 shadow-none"
+                            class="h-10 rounded-xl border-control-border/80 bg-background/90 pl-9 pr-10 shadow-none"
                             @update:model-value="emit('update:search-query', $event)"
                           />
                           <button
@@ -422,6 +423,7 @@ watch(() => props.currentPage, () => {
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                             type="button"
                             title="清空搜索"
+                            aria-label="清空搜索"
                             @click="emit('update:search-query', '')"
                           >
                             <X class="h-4 w-4" />
@@ -448,6 +450,7 @@ watch(() => props.currentPage, () => {
                             @click="emit('view-favorites')"
                             :class="rootName === 'favorites' ? 'text-red-500 bg-red-500/10' : 'text-muted-foreground hover:text-red-500'"
                             title="收藏夹"
+                            aria-label="收藏夹"
                           >
                               <Heart class="h-5 w-5" :class="{ 'fill-current': rootName === 'favorites' }" />
                           </Button>
@@ -458,6 +461,7 @@ watch(() => props.currentPage, () => {
                             @click="toggleStacking"
                             :class="isStackingEnabled ? 'text-primary bg-primary/10' : 'text-muted-foreground'"
                             title="连拍叠图"
+                            :aria-label="isStackingEnabled ? '关闭连拍叠图' : '开启连拍叠图'"
                           >
                             <Layers class="h-5 w-5" />
                           </Button>
@@ -471,9 +475,12 @@ watch(() => props.currentPage, () => {
                               :min="120"
                               :max="500"
                               :step="10"
+                              thumb-label="缩略图尺寸"
                               class="w-20"
                             />
                           </div>
+
+                          <Separator orientation="vertical" class="h-6 bg-border/60" />
 
                           <FilterPanel />
 
@@ -483,6 +490,7 @@ watch(() => props.currentPage, () => {
                             variant="ghost"
                             size="icon"
                             title="提示词提示器"
+                            aria-label="提示词提示器"
                             @click="emit('open-prompt-assistant', { contextLabel: rootLabel || rootName || '当前图库', sourcePath: targetFolderPath || '' })"
                           >
                             <Sparkles class="h-5 w-5 text-muted-foreground" />
@@ -499,7 +507,7 @@ watch(() => props.currentPage, () => {
                       placeholder="全部模型"
                       searchable
                       search-placeholder="搜索模型..."
-                      trigger-class="h-9 min-w-[180px] rounded-full border border-border bg-background px-3 pr-2 text-sm focus:border-primary"
+                      trigger-class="h-9 min-w-[180px] rounded-full border border-control-border bg-background px-3 pr-2 text-sm focus:border-primary"
                       @update:model-value="emit('update:model-filter', $event)"
                     />
                     <AppSelect
@@ -508,7 +516,7 @@ watch(() => props.currentPage, () => {
                       placeholder="全部 LoRA"
                       searchable
                       search-placeholder="搜索 LoRA..."
-                      trigger-class="h-9 min-w-[180px] rounded-full border border-border bg-background px-3 pr-2 text-sm focus:border-primary"
+                      trigger-class="h-9 min-w-[180px] rounded-full border border-control-border bg-background px-3 pr-2 text-sm focus:border-primary"
                       @update:model-value="emit('update:lora-filter', $event)"
                     />
                     <Button
@@ -527,14 +535,14 @@ watch(() => props.currentPage, () => {
                     >
                       清空全部筛选
                     </Button>
-                  </div>
-                  <div
-                    v-if="galleryLoadMode === 'performance'"
-                    class="flex flex-wrap items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm"
-                  >
-                    <span class="font-medium text-primary">性能优先模式</span>
-                    <span class="text-muted-foreground">{{ galleryModeReason || '当前视图使用分页式加载。' }}</span>
-                    <span v-if="pageLoading" class="text-muted-foreground">正在加载当前结果页...</span>
+                    <span
+                      v-if="galleryLoadMode === 'performance'"
+                      class="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs text-primary"
+                      :title="galleryModeReason || '当前视图使用分页式加载。'"
+                    >
+                      <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
+                      性能优先
+                    </span>
                   </div>
               </div>
           </div>
@@ -545,20 +553,32 @@ watch(() => props.currentPage, () => {
           <p class="text-lg font-medium opacity-50">请在左侧选择标签以查看图片</p>
       </div>
 
-      <div v-else-if="loading && images.length === 0" class="flex-1 flex items-center justify-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div v-else-if="loading && images.length === 0" class="flex-1 min-h-0 overflow-hidden" aria-busy="true">
+          <div class="h-full overflow-y-auto custom-scrollbar p-6">
+            <div class="grid gap-6" :style="{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbnailSize[0]}px, 1fr))` }">
+              <div v-for="n in 12" :key="n" class="overflow-hidden rounded-xl border bg-card">
+                <div class="aspect-[3/4] animate-pulse bg-muted"></div>
+                <div class="space-y-2 p-4">
+                  <div class="h-4 w-3/4 animate-pulse rounded bg-muted"></div>
+                  <div class="h-3 w-1/3 animate-pulse rounded bg-muted"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="sr-only" role="status">正在加载图片</span>
       </div>
 
       <div v-else-if="images.length > 0" class="relative flex-1 min-h-0">
-          <div ref="galleryContainer" class="h-full overflow-y-auto custom-scrollbar p-6 pb-28">
+          <div
+            v-if="pageLoading"
+            class="pointer-events-none absolute left-1/2 top-4 z-30 -translate-x-1/2 rounded-full border border-border bg-background/90 px-4 py-1.5 text-sm text-muted-foreground shadow-sm backdrop-blur"
+            role="status"
+            aria-live="polite"
+          >
+            正在切换结果页...
+          </div>
+          <div ref="galleryContainer" class="h-full overflow-y-auto custom-scrollbar p-6 pb-28" :aria-busy="pageLoading">
             <div class="flex flex-col gap-4">
-              <div
-                v-if="pageLoading"
-                class="rounded-2xl border border-dashed bg-muted/20 px-4 py-3 text-sm text-muted-foreground"
-              >
-                正在切换结果页...
-              </div>
-
               <div class="grid gap-6" :style="{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbnailSize[0]}px, 1fr))` }">
                 <ImageCard
                   v-for="img in images"

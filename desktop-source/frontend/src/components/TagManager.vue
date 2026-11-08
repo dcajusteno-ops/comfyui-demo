@@ -248,6 +248,7 @@ const submitBatchCategorize = () => {
                         <div class="flex gap-2">
                              <Input 
                                 v-model="batchCategoryName" 
+                                aria-label="批量标签分类"
                                 placeholder="输入新分类名称 (留空为未分组)"
                                 @keyup.enter="submitBatchCategorize"
                             />
@@ -301,6 +302,9 @@ const submitBatchCategorize = () => {
                             <button
                                 v-for="color in colorPalette"
                                 :key="color"
+                                type="button"
+                                :aria-label="`选择颜色 ${color}`"
+                                :aria-pressed="newTagColor === color"
                                 @click="newTagColor = color"
                                 :style="{ backgroundColor: color }"
                                 :class="[

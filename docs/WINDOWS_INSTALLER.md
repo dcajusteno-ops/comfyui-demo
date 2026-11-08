@@ -1,8 +1,8 @@
 # Windows 安装器说明
 
-当前版本：`v3.3.0`
+当前版本：`v3.3.1`
 
-更新时间：`2026-11-07`
+更新时间：`2026-11-08`
 
 ## 1. 安装器目标
 
@@ -70,7 +70,7 @@ Copy-Item .\desktop-source\build\bin\ComfyManager-amd64-installer.exe .\ComfyMan
 
 ## 6. 当前版本注意事项
 
-- `v3.3.0` 的安装包与根目录 `desktop-app.exe` 使用同一次构建结果，安装包内已包含可搜索下拉菜单、大图库性能优化，并移除了 3D 环绕视图
+- `v3.3.1` 的安装包与根目录 `desktop-app.exe` 使用同一次构建结果，安装包内已包含本轮 UI 可访问性、对比度与视觉一致性优化
 - 安装包显示的版本来自 `build/windows/installer/project.nsi` 的 `INFO_PRODUCTVERSION` —— **改版本号必须改这里**，否则安装包属性里还是旧版本
 - 发布前必须确保根目录安装包是最新构建结果
 - 如果安装器构建失败，优先检查 `makensis` 是否可用

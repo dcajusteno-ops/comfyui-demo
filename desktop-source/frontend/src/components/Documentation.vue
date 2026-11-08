@@ -222,23 +222,23 @@ const faqs = [
       <BookOpen class="mr-3 h-5 w-5 text-primary" />
       <div class="flex items-center gap-3">
         <h1 class="text-xl font-bold tracking-tight">使用文档</h1>
-        <Badge variant="outline" class="rounded-full px-3 py-1 text-xs">v3.3.0</Badge>
+        <Badge variant="outline" class="rounded-full px-3 py-1 text-xs">v3.3.1</Badge>
       </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto">
+    <div class="flex-1 selectable-text overflow-y-auto">
       <div class="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-6 pb-20">
-        <section class="rounded-[28px] border border-border/70 bg-gradient-to-br from-primary/8 via-transparent to-transparent p-7">
+        <section class="rounded-2xl border border-border/70 bg-gradient-to-br from-primary/8 via-transparent to-transparent p-7">
           <div class="space-y-3">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock3 class="h-4 w-4" />
               <span>当前版本说明</span>
             </div>
-            <h2 class="text-3xl font-semibold tracking-tight">v3.3.0 使用说明</h2>
+            <h2 class="text-3xl font-semibold tracking-tight">v3.3.1 使用说明</h2>
             <p class="max-w-3xl text-sm leading-7 text-muted-foreground">
               你现在看到的软件内文档已经与 GitHub README、发布说明、安装器版本和当前桌面程序同步到
-              <span class="font-medium text-foreground">v3.3.0</span>。这一版聚焦图库体验与性能：移除 3D 环绕视图、重做全项目下拉菜单（支持搜索），
-              并优化了大型图库的加载、筛选与自动刷新。
+              <span class="font-medium text-foreground">v3.3.1</span>。这一版聚焦可访问性与视觉一致性：
+              补齐图标按钮 / 开关 / 滑杆的可访问名称，统一对比度、圆角和字号，并修复壁纸模式下提示气泡与首页大图文字的可读性问题。
             </p>
           </div>
         </section>
@@ -347,7 +347,7 @@ const faqs = [
         </section>
 
         <div class="pt-4 text-center text-sm text-muted-foreground">
-          Comfy Manager v3.3.0 / 面向 ComfyUI 出图整理、大图查看、灵动小窗、目录治理与提示词工作流
+          Comfy Manager v3.3.1 / 面向 ComfyUI 出图整理、大图查看、灵动小窗、目录治理与提示词工作流
         </div>
       </div>
     </div>

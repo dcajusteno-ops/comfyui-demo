@@ -290,7 +290,7 @@ const navigateToArchive = () => {
              <!-- Spotlight Card -->
              <div 
                 v-if="recentImages.length > 0"
-                class="flex-1 relative rounded-3xl overflow-hidden border bg-background/50 shadow-sm group cursor-pointer"
+                class="flex-1 relative rounded-2xl overflow-hidden border bg-background/50 shadow-sm group cursor-pointer"
                 @click="openLightbox(recentImages[0], recentImages)"
              >
                 <!-- Cinematic Background -->
@@ -315,26 +315,26 @@ const navigateToArchive = () => {
                 </div>
 
                 <!-- Hero Overlay -->
-                <div class="absolute bottom-0 left-0 right-0 p-8 z-20 bg-gradient-to-t from-background to-transparent pt-24 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                    <div class="flex items-end justify-between">
-                        <div>
+                <div class="hero-fade absolute bottom-0 left-0 right-0 p-8 z-20 pt-32 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                    <div class="flex items-end justify-between gap-4">
+                        <div class="min-w-0">
                              <Badge variant="secondary" class="mb-2 bg-primary/10 text-primary hover:bg-primary/20 border-0">
                                 <Sparkles class="w-3 h-3 mr-1" /> 最新作品
                              </Badge>
-                             <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ recentImages[0].name }}</h1>
+                             <h1 class="truncate text-3xl font-bold tracking-tight text-foreground" :title="recentImages[0].name">{{ recentImages[0].name }}</h1>
                              <p class="text-muted-foreground mt-1 text-sm font-medium">
                                 {{ new Date(recentImages[0].modTime).toLocaleString() }} / {{ (recentImages[0].size / 1024 / 1024).toFixed(2) }} MB
                              </p>
                         </div>
-                        
-                        <Button size="lg" class="shadow-lg rounded-full px-6" @click.stop="openLightbox(recentImages[0], recentImages)">
+
+                        <Button size="lg" class="shrink-0 shadow-lg rounded-full px-6" @click.stop="openLightbox(recentImages[0], recentImages)">
                             查看详情 <ArrowRight class="w-4 h-4 ml-2" />
                         </Button>
                     </div>
                 </div>
              </div>
              
-             <div v-else class="flex-1 flex items-center justify-center border-2 border-dashed rounded-3xl bg-muted/5">
+             <div v-else class="flex-1 flex items-center justify-center border-2 border-dashed rounded-2xl bg-muted/5">
                  <div class="text-center space-y-2">
                      <ImageIcon class="w-12 h-12 text-muted-foreground mx-auto opacity-50" />
                      <p class="text-muted-foreground font-medium">暂无图片，快去生成吧！</p>
@@ -348,8 +348,8 @@ const navigateToArchive = () => {
             <div class="grid grid-cols-2 gap-3 shrink-0">
                  <Card class="group hover:border-amber-500/50 transition-colors">
                     <CardHeader class="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
-                        <CardTitle class="text-sm font-bold text-muted-foreground uppercase tracking-wider">今日新增</CardTitle>
-                        <Sparkles class="w-4 h-4 text-amber-500" />
+                        <CardTitle class="text-sm font-semibold text-muted-foreground">今日新增</CardTitle>
+                        <Sparkles class="w-4 h-4 text-amber-600" />
                     </CardHeader>
                     <CardContent class="p-3 pt-0">
                         <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.todayCount.toLocaleString() }}</div>
@@ -357,7 +357,7 @@ const navigateToArchive = () => {
                 </Card>
                  <Card>
                     <CardHeader class="p-3 pb-1">
-                        <CardTitle class="text-sm font-bold text-muted-foreground uppercase tracking-wider">图片总数</CardTitle>
+                        <CardTitle class="text-sm font-semibold text-muted-foreground">图片总数</CardTitle>
                     </CardHeader>
                     <CardContent class="p-3 pt-0">
                         <div class="text-2xl font-bold">{{ stats.totalCount.toLocaleString() }}</div>
@@ -365,14 +365,11 @@ const navigateToArchive = () => {
                 </Card>
                  <Card class="col-span-2">
                      <CardHeader class="p-3 pb-1 flex flex-row items-center justify-between space-y-0">
-                        <CardTitle class="text-sm font-bold text-muted-foreground uppercase tracking-wider">存储占用</CardTitle>
+                        <CardTitle class="text-sm font-semibold text-muted-foreground">存储占用</CardTitle>
                         <HardDrive class="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent class="p-3 pt-0">
                          <div class="text-2xl font-bold">{{ formatSize(stats.totalSize) }}</div>
-                         <div class="w-full bg-secondary h-1.5 rounded-full mt-2 overflow-hidden">
-                             <div class="bg-primary h-full rounded-full" style="width: 45%"></div> <!-- Mock progress -->
-                         </div>
                     </CardContent>
                  </Card>
             </div>

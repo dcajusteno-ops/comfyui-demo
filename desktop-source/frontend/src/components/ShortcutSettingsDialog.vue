@@ -202,7 +202,7 @@ onUnmounted(() => {
               如果某个按键被系统或其他程序占用，保存时会直接提示。
             </div>
           </div>
-          <Switch :checked="enabled" @update:checked="enabled = $event" />
+          <Switch :checked="enabled" aria-label="启用全局快捷键" @update:checked="enabled = $event" />
         </div>
       </div>
 
@@ -224,7 +224,7 @@ onUnmounted(() => {
               <div class="min-w-0 flex-1 space-y-1">
                 <div class="flex items-center gap-2">
                   <span class="text-sm font-medium">{{ row.label }}</span>
-                  <Badge v-if="row.isDuplicate" variant="destructive" class="text-[10px]">
+                  <Badge v-if="row.isDuplicate" variant="destructive" class="text-[11px]">
                     重复
                   </Badge>
                 </div>

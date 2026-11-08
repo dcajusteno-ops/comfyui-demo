@@ -257,7 +257,7 @@ const handleOpenChange = (isOpen) => {
         <div v-else-if="trashItems.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
           <Inbox class="h-16 w-16 mb-4 opacity-10" />
           <p class="text-lg font-medium">回收站为空</p>
-          <p class="text-sm opacity-60">已删除的图片将显示在这里</p>
+          <p class="text-sm opacity-80">已删除的图片将显示在这里</p>
         </div>
 
         <ScrollArea v-else class="h-full">
@@ -298,12 +298,12 @@ const handleOpenChange = (isOpen) => {
               <!-- Info Area -->
               <div class="p-2 space-y-1">
                 <p class="text-[11px] font-medium truncate" :title="item.filename">{{ item.filename }}</p>
-                <div class="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <div class="flex items-center gap-1 text-[11px] text-muted-foreground">
                   <span class="shrink-0 truncate max-w-[150px]" :title="item.originalPath">
                     来自: {{ item.originalPath.split('/').length <= 1 ? `自动分类/${item.originalPath.split('/')[0]}` : item.originalPath }}
                   </span>
                 </div>
-                <p class="text-[10px] text-muted-foreground/60">
+                <p class="text-[11px] text-muted-foreground">
                   {{ formatDeletedTime(item.deletedAt) }}
                 </p>
               </div>

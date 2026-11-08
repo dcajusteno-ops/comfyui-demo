@@ -307,7 +307,7 @@ watch(() => props.open, async (newVal) => {
             <div class="p-2 space-y-2">
               <div
                 v-if="filteredTemplates.length === 0"
-                class="flex flex-col items-center justify-center py-10 text-muted-foreground opacity-50"
+                class="flex flex-col items-center justify-center py-10 text-muted-foreground opacity-80"
               >
                 <Bookmark class="w-10 h-10 mb-2" />
                 <span class="text-sm">
@@ -323,13 +323,13 @@ watch(() => props.open, async (newVal) => {
                 <div class="flex-1 min-w-0 space-y-1">
                   <div class="flex items-center gap-2">
                     <span class="font-medium text-sm truncate">{{ template.name }}</span>
-                    <Badge variant="secondary" class="shrink-0 text-[10px] px-1.5 py-0">
+                    <Badge variant="secondary" class="shrink-0 text-[11px] px-1.5 py-0">
                       {{ typeLabelMap[template.type] || template.type }}
                     </Badge>
                     <Badge
                       v-if="template.category"
                       variant="outline"
-                      class="shrink-0 text-[10px] px-1.5 py-0"
+                      class="shrink-0 text-[11px] px-1.5 py-0"
                     >
                       {{ template.category }}
                     </Badge>
@@ -388,7 +388,7 @@ watch(() => props.open, async (newVal) => {
         >
           <div class="flex shrink-0 items-center justify-between mb-4">
             <h3 class="font-semibold text-sm">{{ isEditing ? '编辑模板' : '添加新模板' }}</h3>
-            <Button size="icon" variant="ghost" class="h-6 w-6" @click="closeForm">
+            <Button size="icon" variant="ghost" class="h-6 w-6" aria-label="关闭模板表单" @click="closeForm">
               <X class="w-4 h-4" />
             </Button>
           </div>
@@ -397,15 +397,16 @@ watch(() => props.open, async (newVal) => {
             <div class="space-y-3 flex-1 min-h-0 overflow-y-auto scrollbar-hide pr-2">
               <div class="space-y-1">
                 <Label class="text-xs">模板名称</Label>
-                <Input v-model="formData.name" placeholder="例如：高质量人物" class="h-8 select-text" />
+                <Input v-model="formData.name" aria-label="模板名称" placeholder="例如：高质量人物" class="h-8 select-text" />
               </div>
 
               <div class="space-y-1 flex-1 min-h-0 flex flex-col">
                 <Label class="text-xs">提示词内容</Label>
                 <textarea
                   v-model="formData.content"
+                  aria-label="提示词内容"
                   placeholder="输入提示词内容..."
-                  class="w-full flex-1 rounded-md border border-input bg-background px-3 py-2 text-xs leading-6 placeholder:text-muted-foreground transition-[color,box-shadow,border-color] focus-visible:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60 select-text resize-none min-h-[200px]"
+                  class="w-full flex-1 rounded-xl border border-control-border bg-background px-3 py-2 text-xs leading-6 placeholder:text-muted-foreground transition-[color,box-shadow,border-color] focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/60 select-text resize-none min-h-[200px]"
                 />
               </div>
 
@@ -427,7 +428,7 @@ watch(() => props.open, async (newVal) => {
 
               <div class="space-y-1 shrink-0">
                 <Label class="text-xs">分类（可选）</Label>
-                <Input v-model="formData.category" placeholder="例如：人物、画风、质量词" class="h-8 select-text" />
+                <Input v-model="formData.category" aria-label="模板分类" placeholder="例如：人物、画风、质量词" class="h-8 select-text" />
               </div>
             </div>
           </div>

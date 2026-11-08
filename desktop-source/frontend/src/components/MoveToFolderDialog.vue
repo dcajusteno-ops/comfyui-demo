@@ -20,11 +20,11 @@
                             v-model="targetFolder" 
                             @input="handleInput"
                             placeholder="例如: 2026-01/精选集"
-                            class="pl-10 h-11 transition-all border-input/60 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-muted/30 hover:bg-muted/50 focus:bg-background"
+                            class="pl-10 h-11 rounded-xl transition-all border-control-border focus:border-ring focus:ring-2 focus:ring-ring/50 bg-muted/30 hover:bg-muted/50 focus:bg-background"
                             :class="{'border-destructive focus:border-destructive focus:ring-destructive/20': error}"
                             @keyup.enter="handleMove"
                         />
-                        <FolderOpen class="absolute left-3 top-3 w-5 h-5 text-muted-foreground/60 transition-colors group-hover:text-muted-foreground" />
+                        <FolderOpen class="absolute left-3 top-3 w-5 h-5 text-muted-foreground transition-colors group-hover:text-foreground" />
                     </div>
                     <p v-if="error" class="text-xs text-destructive font-medium animate-pulse">{{ error }}</p>
                     <div class="flex items-start gap-2 mt-2 text-xs text-muted-foreground bg-muted/30 p-2.5 rounded-md border border-border/40">
